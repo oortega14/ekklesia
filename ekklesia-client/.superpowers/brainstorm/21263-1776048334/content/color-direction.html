@@ -1,0 +1,146 @@
+<h2>¿Cuál dirección de color te convence?</h2>
+<p class="subtitle">Los tres usan azul oscuro (#0a1628 / #142847) y blanco — solo cambia dónde va cada uno.</p>
+
+<div class="cards">
+
+  <!-- Option A: White content + dark sidebar -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8fafc; border-radius:8px; overflow:hidden; height:200px; display:flex;">
+      <!-- Sidebar -->
+      <div style="width:52px; background:#0a1628; display:flex; flex-direction:column; align-items:center; padding:12px 0; gap:16px; flex-shrink:0;">
+        <div style="width:28px; height:28px; border-radius:6px; background:#1e3a5c;"></div>
+        <div style="width:20px; height:3px; background:#3b82f6; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+      </div>
+      <!-- Content -->
+      <div style="flex:1; padding:10px; background:#f8fafc;">
+        <!-- Header -->
+        <div style="background:white; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="width:60px; height:8px; background:#0a1628; border-radius:4px;"></div>
+          <div style="width:20px; height:20px; border-radius:50%; background:#0a1628;"></div>
+        </div>
+        <!-- Cards row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
+          <div style="background:white; border-radius:6px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <div style="width:30px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:4px;"></div>
+            <div style="font-size:16px; font-weight:bold; color:#0a1628;">24</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+          <div style="background:white; border-radius:6px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <div style="width:30px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:4px;"></div>
+            <div style="font-size:16px; font-weight:bold; color:#0a1628;">48</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+        </div>
+        <!-- Table mock -->
+        <div style="background:white; border-radius:6px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="width:50px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:6px;"></div>
+          <div style="width:100%; height:2px; background:#f1f5f9; margin-bottom:4px;"></div>
+          <div style="width:80%; height:2px; background:#f1f5f9; margin-bottom:4px;"></div>
+          <div style="width:90%; height:2px; background:#f1f5f9;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sidebar oscuro, contenido blanco</h3>
+      <p>Patrón clásico de dashboard. Sidebar navy + contenido blanco puro. Máxima legibilidad en el área de trabajo. El azul oscuro enmarca sin dominar.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Full dark navy throughout -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a1628; border-radius:8px; overflow:hidden; height:200px; display:flex;">
+      <!-- Sidebar -->
+      <div style="width:52px; background:#060d1a; display:flex; flex-direction:column; align-items:center; padding:12px 0; gap:16px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.05);">
+        <div style="width:28px; height:28px; border-radius:6px; background:#1e3a5c;"></div>
+        <div style="width:20px; height:3px; background:#3b82f6; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+      </div>
+      <!-- Content -->
+      <div style="flex:1; padding:10px;">
+        <!-- Header -->
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="width:60px; height:8px; background:white; border-radius:4px;"></div>
+          <div style="width:20px; height:20px; border-radius:50%; background:#1e3a5c; border:1px solid rgba(255,255,255,0.15);"></div>
+        </div>
+        <!-- Cards row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:8px;">
+            <div style="width:30px; height:4px; background:rgba(255,255,255,0.3); border-radius:2px; margin-bottom:4px;"></div>
+            <div style="font-size:16px; font-weight:bold; color:white;">24</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:8px;">
+            <div style="width:30px; height:4px; background:rgba(255,255,255,0.3); border-radius:2px; margin-bottom:4px;"></div>
+            <div style="font-size:16px; font-weight:bold; color:white;">48</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+        </div>
+        <!-- Table mock -->
+        <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:8px;">
+          <div style="width:50px; height:4px; background:rgba(255,255,255,0.4); border-radius:2px; margin-bottom:6px;"></div>
+          <div style="width:100%; height:2px; background:rgba(255,255,255,0.06); margin-bottom:4px;"></div>
+          <div style="width:80%; height:2px; background:rgba(255,255,255,0.06); margin-bottom:4px;"></div>
+          <div style="width:90%; height:2px; background:rgba(255,255,255,0.06);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Todo navy oscuro</h3>
+      <p>Consistente con la página de login. Todo el dashboard en navy profundo con texto blanco. Sensación premium y sofisticada. Igual al login page actual.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Deep navy bg + white cards -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f2035; border-radius:8px; overflow:hidden; height:200px; display:flex;">
+      <!-- Sidebar -->
+      <div style="width:52px; background:#0a1628; display:flex; flex-direction:column; align-items:center; padding:12px 0; gap:16px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.05);">
+        <div style="width:28px; height:28px; border-radius:6px; background:#1e3a5c;"></div>
+        <div style="width:20px; height:3px; background:#60a5fa; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+        <div style="width:20px; height:3px; background:#ffffff22; border-radius:2px;"></div>
+      </div>
+      <!-- Content -->
+      <div style="flex:1; padding:10px;">
+        <!-- Header -->
+        <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; backdrop-filter:blur(10px);">
+          <div style="width:60px; height:8px; background:white; border-radius:4px;"></div>
+          <div style="width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,#1e3a5c,#3b82f6);"></div>
+        </div>
+        <!-- Cards row — white cards on dark bg -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
+          <div style="background:white; border-radius:6px; padding:8px;">
+            <div style="width:30px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:4px; opacity:0.5;"></div>
+            <div style="font-size:16px; font-weight:bold; color:#0a1628;">24</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+          <div style="background:white; border-radius:6px; padding:8px;">
+            <div style="width:30px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:4px; opacity:0.5;"></div>
+            <div style="font-size:16px; font-weight:bold; color:#0a1628;">48</div>
+            <div style="width:24px; height:3px; background:#3b82f6; border-radius:2px; margin-top:4px;"></div>
+          </div>
+        </div>
+        <!-- Table mock — white card -->
+        <div style="background:white; border-radius:6px; padding:8px;">
+          <div style="width:50px; height:4px; background:#0a1628; border-radius:2px; margin-bottom:6px; opacity:0.6;"></div>
+          <div style="width:100%; height:2px; background:#f1f5f9; margin-bottom:4px;"></div>
+          <div style="width:80%; height:2px; background:#f1f5f9; margin-bottom:4px;"></div>
+          <div style="width:90%; height:2px; background:#f1f5f9;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Navy de fondo, cards blancas</h3>
+      <p>Lo mejor de ambos mundos. Fondo navy profundo que contrasta con cards blancas puras. Las tarjetas destacan sobre el fondo. Impacto visual fuerte.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:24px;">Haz clic en la que más te guste y dime en el terminal.</p>
