@@ -32,3 +32,41 @@ RSpec.describe 'Users', type: :request do
     end
   end
 end
+
+RSpec.describe 'Api::V1::Users', type: :request do
+  describe 'GET /api/v1/users' do
+    let(:ministry_a) { create(:ministry) }
+    let(:ministry_b) { create(:ministry) }
+    let(:church_a)   { create(:church, ministry: ministry_a) }
+
+    let(:superadmin) { create(:user, :superadmin) }
+    let(:lead_a)     { create(:user, :lead_pastor, ministry: ministry_a) }
+    let(:pastor_a)   { create(:user, :pastor, ministry: ministry_a, church: church_a) }
+    let!(:lead_b)    { create(:user, :lead_pastor, ministry: ministry_b) }
+
+    it 'superadmin sees all non-superadmin users from every ministry' do
+      lead_a; pastor_a; lead_b
+      get '/api/v1/users', headers: auth_headers_for(superadmin)
+      expect(response).to have_http_status(:ok)
+      ids = JSON.parse(response.body)['users'].map { |u| u['id'] }
+      expect(ids).to include(lead_a.id, pastor_a.id, lead_b.id)
+      expect(ids).not_to include(superadmin.id)
+    end
+
+    it 'lead_pastor only sees users in their own ministry' do
+      lead_a; pastor_a; lead_b
+      get '/api/v1/users', headers: auth_headers_for(lead_a)
+      expect(response).to have_http_status(:ok)
+      ministry_ids = JSON.parse(response.body)['users'].map { |u| u['ministry_id'] }.uniq
+      expect(ministry_ids).to eq([ministry_a.id])
+    end
+
+    it 'payload includes church_name and ministry_name' do
+      pastor_a
+      get '/api/v1/users', headers: auth_headers_for(superadmin)
+      payload = JSON.parse(response.body)['users'].find { |u| u['id'] == pastor_a.id }
+      expect(payload['church_name']).to    eq(church_a.name)
+      expect(payload['ministry_name']).to eq(ministry_a.name)
+    end
+  end
+end
