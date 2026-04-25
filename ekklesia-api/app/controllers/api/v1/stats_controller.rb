@@ -26,6 +26,21 @@ module Api
         render json: { timeline: timeline }
       end
 
+      def contributions_breakdown
+        authorize :stats, :show?
+
+        scope = Contribution.where(submitted_at: Time.current.all_month)
+        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor?
+
+        amounts_by_type = scope.group(:type).sum(:amount)
+
+        breakdown = amounts_by_type.map do |type, amount|
+          { type: type, amount: amount.to_f }
+        end
+
+        render json: { breakdown: breakdown }
+      end
+
       private
 
       def stats_for_current_user
