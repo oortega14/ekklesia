@@ -58,14 +58,14 @@ RSpec.describe 'Api::V1::Users', type: :request do
       get '/api/v1/users', headers: auth_headers_for(lead_a)
       expect(response).to have_http_status(:ok)
       ministry_ids = JSON.parse(response.body)['users'].map { |u| u['ministry_id'] }.uniq
-      expect(ministry_ids).to eq([ministry_a.id])
+      expect(ministry_ids).to eq([ ministry_a.id ])
     end
 
     it 'payload includes church_name and ministry_name' do
       pastor_a
       get '/api/v1/users', headers: auth_headers_for(superadmin)
       payload = JSON.parse(response.body)['users'].find { |u| u['id'] == pastor_a.id }
-      expect(payload['church_name']).to    eq(church_a.name)
+      expect(payload['church_name']).to eq(church_a.name)
       expect(payload['ministry_name']).to eq(ministry_a.name)
     end
   end

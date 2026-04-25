@@ -11,7 +11,7 @@ module Api
         authorize :stats, :show?
 
         scope = AttendanceReport.where(submitted_at: 7.months.ago.beginning_of_month..)
-        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor?
+        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor? || current_user.assistant?
 
         totals_by_month = scope.group("DATE_TRUNC('month', submitted_at)").sum(:total)
 
@@ -30,7 +30,7 @@ module Api
         authorize :stats, :show?
 
         scope = Contribution.where(submitted_at: Time.current.all_month)
-        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor?
+        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor? || current_user.assistant?
 
         amounts_by_type = scope.group(:type).sum(:amount)
 

@@ -51,6 +51,14 @@ RSpec.describe 'Api::V1::Stats', type: :request do
       expect(total).to eq(100)
     end
 
+    it 'assistant sees only their church' do
+      assistant = create(:user, :assistant, ministry: ministry_a, church: church_a1)
+      get '/api/v1/stats/attendance_timeline', headers: auth_headers_for(assistant)
+      timeline = JSON.parse(response.body)['timeline']
+      total = timeline.sum { |p| p['total'] }
+      expect(total).to eq(100)
+    end
+
     it 'each timeline point has month, label and total' do
       get '/api/v1/stats/attendance_timeline', headers: auth_headers_for(superadmin)
       point = JSON.parse(response.body)['timeline'].first
@@ -105,6 +113,13 @@ RSpec.describe 'Api::V1::Stats', type: :request do
 
     it 'pastor sees only their church breakdown' do
       get '/api/v1/stats/contributions_breakdown', headers: auth_headers_for(pastor_a)
+      breakdown = JSON.parse(response.body)['breakdown']
+      expect(breakdown.sum { |b| b['amount'] }).to eq(100 + 50)
+    end
+
+    it 'assistant sees only their church breakdown' do
+      assistant = create(:user, :assistant, ministry: ministry_a, church: church_a)
+      get '/api/v1/stats/contributions_breakdown', headers: auth_headers_for(assistant)
       breakdown = JSON.parse(response.body)['breakdown']
       expect(breakdown.sum { |b| b['amount'] }).to eq(100 + 50)
     end

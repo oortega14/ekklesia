@@ -3,7 +3,7 @@ module Api
     class UsersController < ApplicationController
       def index
         authorize User
-        scope = User.includes(:church, :ministry).where.not(role: :superadmin)
+        scope = User.includes(:account, :church, :ministry).where.not(role: :superadmin)
         scope = scope.where(ministry_id: current_user.ministry_id) unless current_user.superadmin?
         @users = scope.page(params[:page]).per(params[:per_page] || 20)
         render json: { users: @users.map { |u| user_payload(u) } }
