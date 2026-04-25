@@ -62,6 +62,58 @@ RSpec.describe 'Api::V1::Stats', type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe 'GET /api/v1/stats/contributions_breakdown' do
+    let(:ministry_a) { create(:ministry) }
+    let(:ministry_b) { create(:ministry) }
+    let(:church_a)   { create(:church, ministry: ministry_a) }
+    let(:church_b)   { create(:church, ministry: ministry_b) }
+    let(:superadmin) { create(:user, :superadmin) }
+    let(:lead_a)     { create(:user, :lead_pastor, ministry: ministry_a) }
+    let(:pastor_a)   { create(:user, :pastor, ministry: ministry_a, church: church_a) }
+
+    before do
+      ActsAsTenant.with_tenant(ministry_a) do
+        svc = create(:service, ministry: ministry_a, church: church_a)
+        create(:tithe,    service: svc, ministry: ministry_a, reported_by: lead_a, amount: 100, submitted_at: Time.current)
+        create(:offering, service: svc, ministry: ministry_a, reported_by: lead_a, amount: 50,  submitted_at: Time.current)
+      end
+      ActsAsTenant.with_tenant(ministry_b) do
+        svc_b = create(:service, ministry: ministry_b, church: church_b)
+        create(:tithe, service: svc_b, ministry: ministry_b,
+                       reported_by: create(:user, :lead_pastor, ministry: ministry_b),
+                       amount: 999, submitted_at: Time.current)
+      end
+    end
+
+    it 'superadmin sees breakdown across all ministries' do
+      get '/api/v1/stats/contributions_breakdown', headers: auth_headers_for(superadmin)
+      expect(response).to have_http_status(:ok)
+      breakdown = JSON.parse(response.body)['breakdown']
+      tithe_total = breakdown.find { |b| b['type'] == 'Tithe' }['amount']
+      expect(tithe_total).to eq(100 + 999)
+    end
+
+    it 'lead_pastor sees only their ministry breakdown' do
+      get '/api/v1/stats/contributions_breakdown', headers: auth_headers_for(lead_a)
+      breakdown = JSON.parse(response.body)['breakdown']
+      tithe = breakdown.find { |b| b['type'] == 'Tithe' }
+      offering = breakdown.find { |b| b['type'] == 'Offering' }
+      expect(tithe['amount']).to eq(100)
+      expect(offering['amount']).to eq(50)
+    end
+
+    it 'pastor sees only their church breakdown' do
+      get '/api/v1/stats/contributions_breakdown', headers: auth_headers_for(pastor_a)
+      breakdown = JSON.parse(response.body)['breakdown']
+      expect(breakdown.sum { |b| b['amount'] }).to eq(100 + 50)
+    end
+
+    it 'returns 401 without token' do
+      get '/api/v1/stats/contributions_breakdown'
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end
 
 RSpec.describe 'GET /api/v1/stats', type: :request do
