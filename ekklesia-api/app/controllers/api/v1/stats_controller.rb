@@ -7,6 +7,25 @@ module Api
         render json: result if result
       end
 
+      def attendance_timeline
+        authorize :stats, :show?
+
+        scope = AttendanceReport.where(submitted_at: 7.months.ago.beginning_of_month..)
+        scope = scope.joins(:service).where(services: { church_id: current_user.church_id }) if current_user.pastor?
+
+        totals_by_month = scope.group("DATE_TRUNC('month', submitted_at)").sum(:total)
+
+        timeline = totals_by_month.map do |month_date, total|
+          {
+            month: month_date.strftime("%Y-%m"),
+            label: I18n.l(month_date, format: "%b").capitalize,
+            total: total.to_i
+          }
+        end.sort_by { |p| p[:month] }
+
+        render json: { timeline: timeline }
+      end
+
       private
 
       def stats_for_current_user
