@@ -89,7 +89,6 @@ export interface TranslationKeys {
     ministries: string
     churches: string
     users: string
-    roles: string
     reports: string
     statistics: string
     notifications: string
@@ -392,7 +391,6 @@ const es: TranslationKeys = {
     ministries: "Ministerios",
     churches: "Iglesias",
     users: "Usuarios",
-    roles: "Roles",
     reports: "Reportes",
     statistics: "Estadisticas",
     notifications: "Notificaciones",
@@ -695,7 +693,6 @@ const en: TranslationKeys = {
     ministries: "Ministries",
     churches: "Churches",
     users: "Users",
-    roles: "Roles",
     reports: "Reports",
     statistics: "Statistics",
     notifications: "Notifications",
