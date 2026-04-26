@@ -48,6 +48,7 @@ const roleNavItems: Record<string, NavItem[]> = {
     { icon: Church, labelKey: "nav.myChurches", href: "/lead-pastor/churches" },
     { icon: UserCog, labelKey: "nav.pastors", href: "/lead-pastor/pastors" },
     { icon: Calendar, labelKey: "nav.services", href: "/lead-pastor/services" },
+    { icon: BarChart3, labelKey: "nav.reports", href: "/lead-pastor/reports" },
     { icon: Wallet, labelKey: "nav.finances", href: "/lead-pastor/finances" },
     { icon: Settings, labelKey: "nav.settings", href: "/lead-pastor/settings" },
   ],
