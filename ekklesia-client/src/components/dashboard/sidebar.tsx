@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Building2,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useI18n } from "@/lib/i18n"
 import { useAuth } from "@/lib/auth/context"
 
@@ -76,6 +76,14 @@ export function Sidebar({ role }: SidebarProps) {
   const router = useRouter()
   const { t } = useI18n()
   const { logout } = useAuth()
+
+  // Expose collapse state to siblings (page content) via a CSS variable so
+  // the existing `lg:ml-64` wrappers can shrink to ml-20 without each page
+  // having to know about the sidebar's local state.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--sidebar-w', isCollapsed ? '5rem' : '16rem')
+    return () => { document.documentElement.style.removeProperty('--sidebar-w') }
+  }, [isCollapsed])
 
   const items = roleNavItems[role] || []
   const sidebarThemeClass =

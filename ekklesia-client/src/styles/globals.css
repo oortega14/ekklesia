@@ -166,3 +166,12 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Make pages with the dashboard layout (lg:ml-64) follow the sidebar's
+   actual width when it is collapsed. Sidebar.tsx writes --sidebar-w on the
+   documentElement; this rule wins over Tailwind's lg:ml-64 via specificity. */
+@media (min-width: 1024px) {
+  html .lg\:ml-64 {
+    margin-left: var(--sidebar-w, 16rem);
+  }
+}
