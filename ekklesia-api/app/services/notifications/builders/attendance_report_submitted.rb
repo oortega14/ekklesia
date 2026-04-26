@@ -12,21 +12,28 @@ module Notifications
       end
 
       def payload_for(recipient)
-        report  = record
-        service = report.service
         {
-          "attendance_report_id" => report.id,
+          "attendance_report_id" => record.id,
           "service_id"           => service.id,
-          "reported_by_name"     => report.reported_by&.full_name,
-          "church_name"          => service.church&.name,
+          "reported_by_name"     => record.reported_by&.full_name,
+          "church_name"          => church_name,
           "service_type"         => service.service_type,
           "service_date"         => service.scheduled_at&.iso8601,
-          "total"                => report.total,
+          "total"                => record.total,
           "target_url"           => target_url_for(recipient)
         }
       end
 
       private
+
+      # Memoized to avoid re-walking record.service per recipient.
+      def service
+        @service ||= record.service
+      end
+
+      def church_name
+        @church_name ||= service.church&.name
+      end
 
       def target_url_for(recipient)
         recipient.lead_pastor? ? "/lead-pastor/reports" : "/pastor/reports"

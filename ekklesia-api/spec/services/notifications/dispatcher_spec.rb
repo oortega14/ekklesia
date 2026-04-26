@@ -19,6 +19,13 @@ RSpec.describe Notifications::Dispatcher do
 
   let(:actor) { create(:user, :lead_pastor) }
 
+  it "every kind in BUILDERS resolves to a real class" do
+    Notifications::Dispatcher::BUILDERS.each do |kind, class_name|
+      expect { class_name.constantize }.not_to raise_error,
+        "BUILDERS[#{kind.inspect}] = #{class_name.inspect} does not resolve"
+    end
+  end
+
   it "raises when actor is nil" do
     expect {
       described_class.call(:fake_kind, { recipients: [] }, actor: nil)

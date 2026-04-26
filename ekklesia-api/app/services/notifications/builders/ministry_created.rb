@@ -6,14 +6,23 @@ module Notifications
       end
 
       def payload_for(_recipient)
-        ministry = record
-        lead_pastor = User.find_by(role: :lead_pastor, ministry_id: ministry.id)
         {
-          "ministry_id"      => ministry.id,
-          "ministry_name"    => ministry.name,
-          "lead_pastor_name" => lead_pastor&.full_name,
+          "ministry_id"      => record.id,
+          "ministry_name"    => record.name,
+          "lead_pastor_name" => lead_pastor_name,
           "target_url"       => "/superadmin/ministries"
         }
+      end
+
+      private
+
+      # Memoized: payload_for is called once per recipient (all superadmins).
+      # The lead pastor for a given ministry doesn't change between
+      # recipients, so we look it up once.
+      def lead_pastor_name
+        return @lead_pastor_name if defined?(@lead_pastor_name)
+
+        @lead_pastor_name = User.find_by(role: :lead_pastor, ministry_id: record.id)&.full_name
       end
     end
   end

@@ -12,21 +12,28 @@ module Notifications
       end
 
       def payload_for(recipient)
-        contribution = record
-        service      = contribution.service
         {
-          "contribution_id"  => contribution.id,
+          "contribution_id"  => record.id,
           "service_id"       => service.id,
-          "type"             => contribution.type,
-          "type_label"       => Notifications::CONTRIBUTION_TYPE_LABELS.fetch(contribution.type, contribution.type),
-          "amount"           => contribution.amount.to_f,
-          "reported_by_name" => contribution.reported_by&.full_name,
-          "church_name"      => service.church&.name,
+          "type"             => record.type,
+          "type_label"       => Notifications::CONTRIBUTION_TYPE_LABELS.fetch(record.type, record.type),
+          "amount"           => record.amount.to_f,
+          "reported_by_name" => record.reported_by&.full_name,
+          "church_name"      => church_name,
           "target_url"       => target_url_for(recipient)
         }
       end
 
       private
+
+      # Memoized to avoid re-walking record.service per recipient.
+      def service
+        @service ||= record.service
+      end
+
+      def church_name
+        @church_name ||= service.church&.name
+      end
 
       def target_url_for(recipient)
         recipient.lead_pastor? ? "/lead-pastor/reports" : "/pastor/reports"
