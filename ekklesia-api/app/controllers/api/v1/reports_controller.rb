@@ -11,6 +11,12 @@ module Api
         "Reportado por", "Reportado el"
       ].freeze
 
+      CONTRIBUTION_HEADERS = [
+        "Servicio", "Tipo de servicio", "Iglesia", "Fecha",
+        "Tipo", "Monto",
+        "Reportado por", "Reportado el"
+      ].freeze
+
       def attendance
         authorize :report, :attendance?
         scope = build_attendance_scope
@@ -26,6 +32,26 @@ module Api
           render json: {
             rows:      rows.map { |r| attendance_row(r) },
             summary:   attendance_summary(scope),
+            truncated: truncated
+          }
+        end
+      end
+
+      def contributions
+        authorize :report, :contributions?
+        scope = build_contributions_scope
+
+        if csv_format?
+          send_data contributions_csv(scope),
+                    type:     "text/csv; charset=utf-8",
+                    filename: "finanzas-#{period_filename}.csv"
+        else
+          rows = scope.limit(MAX_JSON_ROWS + 1).to_a
+          truncated = rows.length > MAX_JSON_ROWS
+          rows = rows.first(MAX_JSON_ROWS)
+          render json: {
+            rows:      rows.map { |r| contribution_row(r) },
+            summary:   contributions_summary(scope),
             truncated: truncated
           }
         end
@@ -95,6 +121,73 @@ module Api
               r.total,
               r.reported_by&.full_name,
               r.submitted_at&.iso8601
+            ]
+          end
+        end
+      end
+
+      def build_contributions_scope
+        scope = Contribution
+                  .includes(:reported_by, service: :church)
+                  .where(submitted_at: period_range)
+
+        if (cid = effective_church_id)
+          scope = scope.joins(:service).where(services: { church_id: cid })
+        end
+        if params[:contribution_type].present?
+          scope = scope.where(type: params[:contribution_type])
+        end
+
+        scope.order(submitted_at: :desc)
+      end
+
+      def contribution_row(contribution)
+        service = contribution.service
+        {
+          id:               contribution.id,
+          service_id:       service.id,
+          service_type:     service.service_type,
+          scheduled_at:     service.scheduled_at&.iso8601,
+          church_id:        service.church_id,
+          church_name:      service.church&.name,
+          type:             contribution.type,
+          amount:           contribution.amount.to_f,
+          reported_by_name: contribution.reported_by&.full_name,
+          submitted_at:     contribution.submitted_at&.iso8601
+        }
+      end
+
+      def contributions_summary(scope)
+        count = scope.count
+        total = scope.sum(:amount).to_f
+        # unscope(:order) — Postgres rejects ORDER BY columns that
+        # aren't aggregated/grouped. The outer scope orders by
+        # submitted_at, which doesn't appear in the GROUP BY.
+        breakdown = scope.unscope(:order).group(:type).sum(:amount).map do |type, amt|
+          { type: type, amount: amt.to_f }
+        end
+        {
+          total_count:       count,
+          total_amount:      total,
+          breakdown_by_type: breakdown,
+          period_label:      period_label
+        }
+      end
+
+      def contributions_csv(scope)
+        CSV.generate(headers: false) do |csv|
+          csv << CONTRIBUTION_HEADERS
+          scope.find_each do |c|
+            service = c.service
+            csv << [
+              service.id,
+              service.service_type,
+              service.church&.name,
+              service.scheduled_at&.iso8601,
+              c.type,
+              c.amount.to_f,
+              c.reported_by&.full_name,
+              c.submitted_at&.iso8601
             ]
           end
         end
