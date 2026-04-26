@@ -21,6 +21,9 @@ gem 'pundit', '~> 2.3'
 # Pagination
 gem 'kaminari', '~> 1.2'
 
+# CSV (no longer in Ruby default gems as of 3.4)
+gem 'csv', '~> 3.3'
+
 # CORS
 gem 'rack-cors', '~> 2.0'
 
