@@ -193,7 +193,7 @@ module Api
         end
       end
 
-      # ── Shared helpers (also used by contributions in Task 5) ────────
+      # ── Shared helpers (used by both actions) ────────────────────────
 
       def csv_format?
         params[:format].to_s.downcase == "csv"
@@ -236,10 +236,10 @@ module Api
 
         return cid if current_user.superadmin?
 
-        # lead_pastor: tenant scoping auto-filters by ministry. If the
-        # requested church belongs to another ministry, .exists? returns
-        # false and we ignore the param.
-        Church.where(id: cid).exists? ? cid : nil
+        # lead_pastor: validate explicitly against the user's ministry.
+        # acts_as_tenant would also enforce this, but stating the
+        # constraint here removes the implicit dependency on set_tenant.
+        Church.where(id: cid, ministry_id: current_user.ministry_id).exists? ? cid : nil
       end
     end
   end
