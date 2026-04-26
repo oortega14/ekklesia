@@ -8,19 +8,19 @@ import { ChartCard } from '@/components/dashboard/chart-card'
 import { Church, Users, Calendar, Wallet } from 'lucide-react'
 import { useI18n } from '@/lib/i18n'
 import { useAuthStore, ROLE_LABELS } from '@/lib/auth/store'
-import { getStats, getAttendanceTimeline, getContributionsBreakdown } from '@/lib/api/stats'
+import { getSuperadminStats, getAttendanceTimeline, getContributionsBreakdown } from '@/lib/api/stats'
 import { listChurches } from '@/lib/api/churches'
 
 function SuperAdminDashboard() {
   const { t } = useI18n()
   const { user } = useAuthStore()
 
-  const statsQ      = useQuery({ queryKey: ['stats'], queryFn: getStats })
+  const statsQ      = useQuery({ queryKey: ['stats'], queryFn: getSuperadminStats })
   const timelineQ   = useQuery({ queryKey: ['stats', 'attendance_timeline'], queryFn: getAttendanceTimeline })
   const breakdownQ  = useQuery({ queryKey: ['stats', 'contributions_breakdown'], queryFn: getContributionsBreakdown })
   const churchesQ   = useQuery({ queryKey: ['churches'], queryFn: () => listChurches({ perPage: 100 }) })
 
-  const isLoading = statsQ.isLoading || timelineQ.isLoading || breakdownQ.isLoading || churchesQ.isLoading
+  const statsLoading = statsQ.isLoading
   const hasError  = statsQ.error || timelineQ.error || breakdownQ.error || churchesQ.error
 
   const statsCards = [
@@ -104,7 +104,7 @@ function SuperAdminDashboard() {
               <StatsCard
                 key={stat.title}
                 title={stat.title}
-                value={isLoading ? '…' : stat.value}
+                value={statsLoading ? '…' : stat.value}
                 icon={stat.icon}
                 delay={index * 0.1}
               />

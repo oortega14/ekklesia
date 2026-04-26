@@ -1,6 +1,6 @@
 import apiClient from './client'
 
-export interface Stats {
+export interface SuperadminStats {
   total_churches: number
   total_users: number
   services_this_month: number
@@ -21,8 +21,8 @@ export interface ContributionBreakdownItem {
   amount: number
 }
 
-export async function getStats(): Promise<Stats> {
-  const { data } = await apiClient.get<Stats>('/api/v1/stats')
+export async function getSuperadminStats(): Promise<SuperadminStats> {
+  const { data } = await apiClient.get<SuperadminStats>('/api/v1/stats')
   return data
 }
 

@@ -33,6 +33,7 @@ import {
   type UserRole
 } from '@/lib/api/users'
 import { listChurches } from '@/lib/api/churches'
+import { listMinistries } from '@/lib/api/ministries'
 
 const roleBadgeColors: Record<UserRole, string> = {
   lead_pastor: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -60,10 +61,11 @@ interface FormData {
   password: string
   role: UserRole | ''
   church_id: number | ''
+  ministry_id: number | ''
 }
 
 const emptyForm: FormData = {
-  first_name: '', last_name: '', email: '', phone: '', password: '', role: '', church_id: ''
+  first_name: '', last_name: '', email: '', phone: '', password: '', role: '', church_id: '', ministry_id: ''
 }
 
 function SuperAdminUsuarios() {
@@ -78,20 +80,40 @@ function SuperAdminUsuarios() {
   const [activeMenu, setActiveMenu] = useState<number | null>(null)
   const [formData, setFormData] = useState<FormData>(emptyForm)
 
-  const usersQ    = useQuery({ queryKey: ['users'],    queryFn: () => listUsers({ perPage: 100 }) })
-  const churchesQ = useQuery({ queryKey: ['churches'], queryFn: () => listChurches({ perPage: 100 }) })
+  const usersQ      = useQuery({ queryKey: ['users'],      queryFn: () => listUsers({ perPage: 100 }) })
+  const churchesQ   = useQuery({ queryKey: ['churches'],   queryFn: () => listChurches({ perPage: 100 }) })
+  const ministriesQ = useQuery({ queryKey: ['ministries'], queryFn: listMinistries })
 
   const createM = useMutation({
     mutationFn: createUser,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsCreateModalOpen(false); setFormData(emptyForm) }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      qc.invalidateQueries({ queryKey: ['churches'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+      setIsCreateModalOpen(false)
+      setFormData(emptyForm)
+    }
   })
   const updateM = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateUser>[1] }) => updateUser(id, payload),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsEditModalOpen(false); setFormData(emptyForm); setSelectedUser(null) }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      qc.invalidateQueries({ queryKey: ['churches'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+      setIsEditModalOpen(false)
+      setFormData(emptyForm)
+      setSelectedUser(null)
+    }
   })
   const deleteM = useMutation({
     mutationFn: deleteUser,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsDeleteModalOpen(false); setSelectedUser(null) }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      qc.invalidateQueries({ queryKey: ['churches'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+      setIsDeleteModalOpen(false)
+      setSelectedUser(null)
+    }
   })
 
   const filtered = useMemo(() => {
@@ -106,7 +128,8 @@ function SuperAdminUsuarios() {
     })
   }, [usersQ.data, searchQuery, roleFilter])
 
-  const churchOptions = (churchesQ.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))
+  const churchOptions   = (churchesQ.data   ?? []).map((c) => ({ value: String(c.id), label: c.name }))
+  const ministryOptions = (ministriesQ.data ?? []).map((m) => ({ value: String(m.id), label: m.name }))
   const roleOptions: Array<{ value: UserRole; label: string }> = [
     { value: 'lead_pastor', label: ROLE_LABELS.lead_pastor },
     { value: 'pastor',      label: ROLE_LABELS.pastor },
@@ -117,13 +140,14 @@ function SuperAdminUsuarios() {
   const openEdit = (u: UserRow) => {
     setSelectedUser(u)
     setFormData({
-      first_name: u.first_name,
-      last_name:  u.last_name,
-      email:      u.email ?? '',
-      phone:      '',
-      password:   '',
-      role:       u.role,
-      church_id:  u.church_id ?? ''
+      first_name:  u.first_name,
+      last_name:   u.last_name,
+      email:       u.email ?? '',
+      phone:       '',
+      password:    '',
+      role:        u.role,
+      church_id:   u.church_id ?? '',
+      ministry_id: u.ministry_id ?? ''
     })
     setIsEditModalOpen(true)
     setActiveMenu(null)
@@ -133,13 +157,14 @@ function SuperAdminUsuarios() {
   const submitCreate = () => {
     if (!formData.role) return
     createM.mutate({
-      email:      formData.email,
-      password:   formData.password,
-      first_name: formData.first_name,
-      last_name:  formData.last_name,
-      phone:      formData.phone || undefined,
-      role:       formData.role,
-      church_id:  formData.church_id === '' ? undefined : Number(formData.church_id)
+      email:       formData.email,
+      password:    formData.password,
+      first_name:  formData.first_name,
+      last_name:   formData.last_name,
+      phone:       formData.phone || undefined,
+      role:        formData.role,
+      church_id:   formData.church_id   === '' ? undefined : Number(formData.church_id),
+      ministry_id: formData.ministry_id === '' ? undefined : Number(formData.ministry_id)
     })
   }
   const submitUpdate = () => {
@@ -337,6 +362,7 @@ function SuperAdminUsuarios() {
             <FormSelect label="Rol" name="role" value={formData.role} onChange={(v) => setFormData({ ...formData, role: v as UserRole })} options={roleOptions} icon={Shield} required />
           </FormFieldGroup>
           <FormFieldGroup>
+            <FormSelect label="Ministerio" name="ministry_id" value={String(formData.ministry_id)} onChange={(v) => setFormData({ ...formData, ministry_id: v ? Number(v) : '' })} options={ministryOptions} icon={Shield} required />
             <FormSelect label="Iglesia" name="church_id" value={String(formData.church_id)} onChange={(v) => setFormData({ ...formData, church_id: v ? Number(v) : '' })} options={churchOptions} icon={Church} />
           </FormFieldGroup>
           {createM.error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">Error al crear usuario.</div>}
