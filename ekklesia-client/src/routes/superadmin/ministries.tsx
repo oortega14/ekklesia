@@ -91,7 +91,6 @@ function SuperAdminMinisterios() {
   const openDelete = (m: MinistryRow) => { setSelectedMinistry(m); setIsDeleteModalOpen(true) }
 
   const submitCreate = () => {
-    if (!formData.name || !formData.pastor_email || !formData.pastor_password) return
     createM.mutate({
       ministry: {
         name:    formData.name,
@@ -253,7 +252,7 @@ function SuperAdminMinisterios() {
               name="name"
               placeholder="Ej: Ministerio Casa de Oracion"
               value={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
+              onChange={(value) => setFormData((prev) => ({ ...prev, name: value }))}
               icon={Building2}
               required
             />
@@ -263,7 +262,7 @@ function SuperAdminMinisterios() {
                 name="country"
                 placeholder="Ej: Mexico"
                 value={formData.country}
-                onChange={(value) => setFormData({ ...formData, country: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, country: value }))}
                 icon={Globe}
               />
               <FormInput
@@ -271,7 +270,7 @@ function SuperAdminMinisterios() {
                 name="city"
                 placeholder="Ej: Ciudad de Mexico"
                 value={formData.city}
-                onChange={(value) => setFormData({ ...formData, city: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, city: value }))}
                 icon={MapPin}
               />
             </FormFieldGroup>
@@ -285,7 +284,7 @@ function SuperAdminMinisterios() {
                 name="pastor_first_name"
                 placeholder="Pedro"
                 value={formData.pastor_first_name}
-                onChange={(value) => setFormData({ ...formData, pastor_first_name: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, pastor_first_name: value }))}
                 icon={User}
                 required
               />
@@ -294,7 +293,7 @@ function SuperAdminMinisterios() {
                 name="pastor_last_name"
                 placeholder="Lider"
                 value={formData.pastor_last_name}
-                onChange={(value) => setFormData({ ...formData, pastor_last_name: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, pastor_last_name: value }))}
                 icon={User}
                 required
               />
@@ -306,7 +305,7 @@ function SuperAdminMinisterios() {
                 type="email"
                 placeholder="pastor@ejemplo.com"
                 value={formData.pastor_email}
-                onChange={(value) => setFormData({ ...formData, pastor_email: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, pastor_email: value }))}
                 icon={Mail}
                 required
               />
@@ -316,7 +315,7 @@ function SuperAdminMinisterios() {
                 type="tel"
                 placeholder="+52 55 1234 5678"
                 value={formData.pastor_phone}
-                onChange={(value) => setFormData({ ...formData, pastor_phone: value })}
+                onChange={(value) => setFormData((prev) => ({ ...prev, pastor_phone: value }))}
                 icon={Phone}
               />
             </FormFieldGroup>
@@ -326,7 +325,7 @@ function SuperAdminMinisterios() {
               type="password"
               placeholder="Minimo 8 caracteres"
               value={formData.pastor_password}
-              onChange={(value) => setFormData({ ...formData, pastor_password: value })}
+              onChange={(value) => setFormData((prev) => ({ ...prev, pastor_password: value }))}
               icon={Lock}
               required
             />

@@ -115,7 +115,7 @@ export function FormModal({
                 {cancelText}
               </Button>
               <Button
-                onClick={() => { onSubmit(); onClose(); }}
+                onClick={onSubmit}
                 variant="blue"
               >
                 {submitText}
