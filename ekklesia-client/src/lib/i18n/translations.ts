@@ -90,7 +90,6 @@ export interface TranslationKeys {
     churches: string
     users: string
     reports: string
-    statistics: string
     notifications: string
     settings: string
     pastors: string
@@ -238,19 +237,6 @@ export interface TranslationKeys {
     prayer: string
     deleteConfirm: string
   }
-  statistics: {
-    title: string
-    attendanceTrend: string
-    incomeTrend: string
-    memberGrowth: string
-    serviceComparison: string
-    topChurches: string
-    monthlyOverview: string
-    yearlyOverview: string
-    average: string
-    growth: string
-    decline: string
-  }
   notifications: {
     title: string
     markAllRead: string
@@ -392,7 +378,6 @@ const es: TranslationKeys = {
     churches: "Iglesias",
     users: "Usuarios",
     reports: "Reportes",
-    statistics: "Estadisticas",
     notifications: "Notificaciones",
     settings: "Configuracion",
     pastors: "Pastores",
@@ -540,19 +525,6 @@ const es: TranslationKeys = {
     prayer: "Oracion",
     deleteConfirm: "Esta seguro de eliminar este servicio?",
   },
-  statistics: {
-    title: "Centro de Estadisticas",
-    attendanceTrend: "Tendencia de Asistencia",
-    incomeTrend: "Tendencia de Ingresos",
-    memberGrowth: "Crecimiento de Miembros",
-    serviceComparison: "Comparacion de Servicios",
-    topChurches: "Iglesias Destacadas",
-    monthlyOverview: "Resumen Mensual",
-    yearlyOverview: "Resumen Anual",
-    average: "Promedio",
-    growth: "Crecimiento",
-    decline: "Decrecimiento",
-  },
   notifications: {
     title: "Notificaciones",
     markAllRead: "Marcar todo como leido",
@@ -694,7 +666,6 @@ const en: TranslationKeys = {
     churches: "Churches",
     users: "Users",
     reports: "Reports",
-    statistics: "Statistics",
     notifications: "Notifications",
     settings: "Settings",
     pastors: "Pastors",
@@ -841,19 +812,6 @@ const en: TranslationKeys = {
     youth: "Youth",
     prayer: "Prayer",
     deleteConfirm: "Are you sure you want to delete this service?",
-  },
-  statistics: {
-    title: "Statistics Center",
-    attendanceTrend: "Attendance Trend",
-    incomeTrend: "Income Trend",
-    memberGrowth: "Member Growth",
-    serviceComparison: "Service Comparison",
-    topChurches: "Top Churches",
-    monthlyOverview: "Monthly Overview",
-    yearlyOverview: "Yearly Overview",
-    average: "Average",
-    growth: "Growth",
-    decline: "Decline",
   },
   notifications: {
     title: "Notifications",

@@ -16,7 +16,6 @@ import {
   ClipboardList,
   Bell,
   HelpCircle,
-  TrendingUp,
   Building2,
 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -41,7 +40,6 @@ const roleNavItems: Record<string, NavItem[]> = {
     { icon: Church, labelKey: "nav.churches", href: "/superadmin/churches" },
     { icon: Users, labelKey: "nav.users", href: "/superadmin/users" },
     { icon: BarChart3, labelKey: "nav.reports", href: "/superadmin/reports" },
-    { icon: TrendingUp, labelKey: "nav.statistics", href: "/superadmin/statistics" },
     { icon: Bell, labelKey: "nav.notifications", href: "/superadmin/notifications" },
     { icon: Settings, labelKey: "nav.settings", href: "/superadmin/settings" },
   ],
@@ -50,7 +48,6 @@ const roleNavItems: Record<string, NavItem[]> = {
     { icon: Church, labelKey: "nav.myChurches", href: "/lead-pastor/churches" },
     { icon: UserCog, labelKey: "nav.pastors", href: "/lead-pastor/pastors" },
     { icon: Calendar, labelKey: "nav.services", href: "/lead-pastor/services" },
-    { icon: TrendingUp, labelKey: "nav.statistics", href: "/lead-pastor/statistics" },
     { icon: Wallet, labelKey: "nav.finances", href: "/lead-pastor/finances" },
     { icon: Settings, labelKey: "nav.settings", href: "/lead-pastor/settings" },
   ],
@@ -58,7 +55,6 @@ const roleNavItems: Record<string, NavItem[]> = {
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/pastor" },
     { icon: ClipboardList, labelKey: "nav.reports", href: "/pastor/reports" },
     { icon: Users, labelKey: "nav.assistants", href: "/pastor/assistants" },
-    { icon: TrendingUp, labelKey: "nav.statistics", href: "/pastor/statistics" },
     { icon: Calendar, labelKey: "nav.services", href: "/pastor/services" },
   ],
   assistant: [
