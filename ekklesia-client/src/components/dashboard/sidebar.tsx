@@ -37,17 +37,17 @@ interface NavItem {
 const roleNavItems: Record<string, NavItem[]> = {
   superadmin: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/superadmin" },
-    { icon: Church, labelKey: "nav.churches", href: "/superadmin/churches", badge: 12 },
+    { icon: Church, labelKey: "nav.churches", href: "/superadmin/churches" },
     { icon: Users, labelKey: "nav.users", href: "/superadmin/users" },
     { icon: Shield, labelKey: "nav.roles", href: "/superadmin/roles" },
     { icon: BarChart3, labelKey: "nav.reports", href: "/superadmin/reports" },
     { icon: TrendingUp, labelKey: "nav.statistics", href: "/superadmin/statistics" },
-    { icon: Bell, labelKey: "nav.notifications", href: "/superadmin/notifications", badge: 5 },
+    { icon: Bell, labelKey: "nav.notifications", href: "/superadmin/notifications" },
     { icon: Settings, labelKey: "nav.settings", href: "/superadmin/settings" },
   ],
   lead_pastor: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/lead-pastor" },
-    { icon: Church, labelKey: "nav.myChurches", href: "/lead-pastor/churches", badge: 3 },
+    { icon: Church, labelKey: "nav.myChurches", href: "/lead-pastor/churches" },
     { icon: UserCog, labelKey: "nav.pastors", href: "/lead-pastor/pastors" },
     { icon: Calendar, labelKey: "nav.services", href: "/lead-pastor/services" },
     { icon: TrendingUp, labelKey: "nav.statistics", href: "/lead-pastor/statistics" },
