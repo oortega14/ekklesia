@@ -247,13 +247,29 @@ export interface TranslationKeys {
   }
   notifications: {
     title: string
+    tabUnread: string
+    tabAll: string
     markAllRead: string
-    noNotifications: string
-    newChurch: string
-    newReport: string
-    newPastor: string
-    reportApproved: string
-    reportRejected: string
+    viewAll: string
+    empty: string
+    markRead: string
+    delete: string
+    genericFallback: string
+    filterAllKinds: string
+    relativeJustNow: string
+    relativeMinutes: string
+    relativeHours: string
+    relativeDays: string
+    kinds: {
+      ministry_created:            { title: string; body: string }
+      service_request_created:     { title: string; body: string }
+      service_request_approved:    { title: string; body: string }
+      service_request_rejected:    { title: string; body: string }
+      attendance_report_submitted: { title: string; body: string }
+      contribution_recorded:       { title: string; body: string }
+      user_created:                { title: string; body: string }
+      church_created:              { title: string; body: string }
+    }
   }
   profile: {
     title: string
@@ -542,14 +558,54 @@ const es: TranslationKeys = {
     deleteConfirm: "Esta seguro de eliminar este servicio?",
   },
   notifications: {
-    title: "Notificaciones",
-    markAllRead: "Marcar todo como leido",
-    noNotifications: "No hay notificaciones",
-    newChurch: "Nueva iglesia registrada",
-    newReport: "Nuevo reporte enviado",
-    newPastor: "Nuevo pastor asignado",
-    reportApproved: "Reporte aprobado",
-    reportRejected: "Reporte rechazado",
+    title:           "Notificaciones",
+    tabUnread:       "No leídas",
+    tabAll:          "Todas",
+    markAllRead:     "Marcar todas como leídas",
+    viewAll:         "Ver todas",
+    empty:           "No tienes notificaciones",
+    markRead:        "Marcar leída",
+    delete:          "Borrar",
+    genericFallback: "Nueva notificación",
+    filterAllKinds:  "Todos los tipos",
+    relativeJustNow: "ahora mismo",
+    relativeMinutes: "hace {{n}} min",
+    relativeHours:   "hace {{n}} h",
+    relativeDays:    "hace {{n}} d",
+    kinds: {
+      ministry_created: {
+        title: "Nuevo ministerio: {{ministry_name}}",
+        body:  "Pastor principal: {{lead_pastor_name}}"
+      },
+      service_request_created: {
+        title: "{{requested_by_name}} solicitó programar un servicio",
+        body:  "{{church_name}} · {{service_type}} · {{requested_for}}"
+      },
+      service_request_approved: {
+        title: "Tu solicitud fue aprobada",
+        body:  "{{service_type}} en {{church_name}} para {{requested_for}}, aprobada por {{reviewed_by_name}}"
+      },
+      service_request_rejected: {
+        title: "Tu solicitud fue rechazada",
+        body:  "{{service_type}} en {{church_name}} para {{requested_for}}, rechazada por {{reviewed_by_name}}"
+      },
+      attendance_report_submitted: {
+        title: "Nuevo reporte de asistencia",
+        body:  "{{reported_by_name}} reportó {{total}} asistentes en {{church_name}} ({{service_type}})"
+      },
+      contribution_recorded: {
+        title: "{{reported_by_name}} registró una contribución",
+        body:  "{{type_label}} de ${{amount}} en {{church_name}}"
+      },
+      user_created: {
+        title: "Nuevo {{user_role_label}}: {{user_name}}",
+        body:  "Asignado a {{church_name}}"
+      },
+      church_created: {
+        title: "Nueva iglesia: {{church_name}}",
+        body:  "Ciudad: {{city}}"
+      }
+    }
   },
   profile: {
     title: "Perfil",
@@ -838,14 +894,54 @@ const en: TranslationKeys = {
     deleteConfirm: "Are you sure you want to delete this service?",
   },
   notifications: {
-    title: "Notifications",
-    markAllRead: "Mark all as read",
-    noNotifications: "No notifications",
-    newChurch: "New church registered",
-    newReport: "New report submitted",
-    newPastor: "New pastor assigned",
-    reportApproved: "Report approved",
-    reportRejected: "Report rejected",
+    title:           "Notifications",
+    tabUnread:       "Unread",
+    tabAll:          "All",
+    markAllRead:     "Mark all as read",
+    viewAll:         "View all",
+    empty:           "No notifications",
+    markRead:        "Mark read",
+    delete:          "Delete",
+    genericFallback: "New notification",
+    filterAllKinds:  "All kinds",
+    relativeJustNow: "just now",
+    relativeMinutes: "{{n}}m ago",
+    relativeHours:   "{{n}}h ago",
+    relativeDays:    "{{n}}d ago",
+    kinds: {
+      ministry_created: {
+        title: "New ministry: {{ministry_name}}",
+        body:  "Lead pastor: {{lead_pastor_name}}"
+      },
+      service_request_created: {
+        title: "{{requested_by_name}} requested a service",
+        body:  "{{church_name}} · {{service_type}} · {{requested_for}}"
+      },
+      service_request_approved: {
+        title: "Your request was approved",
+        body:  "{{service_type}} at {{church_name}} for {{requested_for}}, approved by {{reviewed_by_name}}"
+      },
+      service_request_rejected: {
+        title: "Your request was rejected",
+        body:  "{{service_type}} at {{church_name}} for {{requested_for}}, rejected by {{reviewed_by_name}}"
+      },
+      attendance_report_submitted: {
+        title: "New attendance report",
+        body:  "{{reported_by_name}} reported {{total}} attendees at {{church_name}} ({{service_type}})"
+      },
+      contribution_recorded: {
+        title: "{{reported_by_name}} recorded a contribution",
+        body:  "{{type_label}} of ${{amount}} at {{church_name}}"
+      },
+      user_created: {
+        title: "New {{user_role_label}}: {{user_name}}",
+        body:  "Assigned to {{church_name}}"
+      },
+      church_created: {
+        title: "New church: {{church_name}}",
+        body:  "City: {{city}}"
+      }
+    }
   },
   profile: {
     title: "Profile",
