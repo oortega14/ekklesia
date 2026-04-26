@@ -2,12 +2,11 @@ require "sequel/core"
 
 class RodauthMain < Rodauth::Rails::Auth
   configure do
-    enable :login, :logout, :create_account, :jwt
+    enable :login, :logout, :jwt
 
     # ── Routes (relative to /api/v1/auth) ────────────────────────────
-    login_route          'login'
-    logout_route         'logout'
-    create_account_route 'signup'
+    login_route  "login"
+    logout_route "logout"
 
     # ── General ───────────────────────────────────────────────────────
     db Sequel.postgres(extensions: :activerecord_connection, keep_reference: false)
@@ -22,9 +21,6 @@ class RodauthMain < Rodauth::Rails::Auth
     account_open_status_value 1
 
     login_param "email"
-
-    password_minimum_length 8
-    password_maximum_bytes 72
 
     rails_controller { RodauthController }
 
@@ -45,45 +41,23 @@ class RodauthMain < Rodauth::Rails::Auth
       user = ::User.find_by(account_id: account_id)
 
       access_payload = {
-        'sub'         => account_id.to_s,
-        'account_id'  => account_id,
-        'iat'         => Time.current.to_i,
-        'exp'         => 30.minutes.from_now.to_i,
-        'role'        => user&.role,
-        'ministry_id' => user&.ministry_id,
-        'church_id'   => user&.church_id
+        "sub"         => account_id.to_s,
+        "account_id"  => account_id,
+        "iat"         => Time.current.to_i,
+        "exp"         => 30.minutes.from_now.to_i,
+        "role"        => user&.role,
+        "ministry_id" => user&.ministry_id,
+        "church_id"   => user&.church_id
       }
-      json_response['access_token'] = JWT.encode(access_payload, secret, 'HS256')
+      json_response["access_token"] = JWT.encode(access_payload, secret, "HS256")
 
       refresh_payload = {
-        'sub'  => account_id.to_s,
-        'iat'  => Time.current.to_i,
-        'exp'  => 7.days.from_now.to_i,
-        'type' => 'refresh'
+        "sub"  => account_id.to_s,
+        "iat"  => Time.current.to_i,
+        "exp"  => 7.days.from_now.to_i,
+        "type" => "refresh"
       }
-      json_response['refresh_token'] = JWT.encode(refresh_payload, secret, 'HS256')
-    end
-
-    # ── Signup: initialize jwt_secret before account is created ──────
-    before_create_account do
-      account[:jwt_secret] = SecureRandom.hex(32)
-    end
-
-    # ── Signup: create Ministry + User atomically ─────────────────────
-    after_create_account do
-      ministry = ::Ministry.create!(
-        name:    param('ministry_name'),
-        country: param('country'),
-        city:    param('city')
-      )
-      ::User.create!(
-        account_id: account_id,
-        ministry:   ministry,
-        first_name: param('first_name'),
-        last_name:  param('last_name'),
-        phone:      param('phone'),
-        role:       :lead_pastor
-      )
+      json_response["refresh_token"] = JWT.encode(refresh_payload, secret, "HS256")
     end
 
     # ── Logout: rotate jwt_secret → both tokens become invalid ────────
@@ -92,6 +66,6 @@ class RodauthMain < Rodauth::Rails::Auth
                    .update(jwt_secret: SecureRandom.hex(32))
     end
 
-    login_redirect { '/' }
+    login_redirect { "/" }
   end
 end
