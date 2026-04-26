@@ -45,12 +45,13 @@ RSpec.describe "Api::V1::Auth::ChangePassword", type: :request do
            },
            as: :json
 
-      expect(response.status).to be_between(400, 499)
+      expect(response.status).to be_between(400, 422)
+      expect(response).not_to have_http_status(:ok)
       account.reload
       expect(BCrypt::Password.new(account.password_hash).is_password?("OldPass123!")).to be true
     end
 
-    it "rejects when the new password is too short" do
+    it "rejects when the new password is too short (4xx, password unchanged)" do
       token = login_and_get_token
 
       post "/api/v1/auth/change-password",
@@ -62,7 +63,10 @@ RSpec.describe "Api::V1::Auth::ChangePassword", type: :request do
            },
            as: :json
 
-      expect(response.status).to be_between(400, 499)
+      expect(response.status).to be_between(400, 422)
+      expect(response).not_to have_http_status(:ok)
+      account.reload
+      expect(BCrypt::Password.new(account.password_hash).is_password?("OldPass123!")).to be true
     end
 
     it "rejects without an auth header" do
@@ -73,7 +77,7 @@ RSpec.describe "Api::V1::Auth::ChangePassword", type: :request do
              "password-confirm" => "NewPass456!"
            },
            as: :json
-      expect(response.status).to be_between(400, 499)
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it "the OLD access token is rejected after a successful change (jwt_secret rotated)" do

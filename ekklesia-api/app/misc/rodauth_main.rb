@@ -48,6 +48,10 @@ class RodauthMain < Rodauth::Rails::Auth
           end
         end
       account = acct_id && db[:accounts].where(id: acct_id).first
+      # Fallback: no real token is signed with bare secret_key_base alone,
+      # so verification always fails closed when the account can't be
+      # resolved. Returning nil from this block makes Rodauth crash, so
+      # we return a deterministic non-matching value.
       account ? "#{Rails.application.secret_key_base}-#{account[:jwt_secret]}" : Rails.application.secret_key_base
     end
 
@@ -56,6 +60,11 @@ class RodauthMain < Rodauth::Rails::Auth
     # We add both tokens here because Rodauth's JSON feature uses
     # _json_response_body (not the overridable json_response_body) to
     # build the response, so this is the right place to inject tokens.
+    #
+    # The encode block below is duplicated in after_change_password —
+    # any change to payload shape, TTL, or algorithm must be made in
+    # both places. Defining a shared helper inside Rodauth's configure
+    # block isn't straightforward (auth-instance method dispatch).
     after_login do
       account_row = db[:accounts].where(id: account_id).first
       secret = "#{Rails.application.secret_key_base}-#{account_row[:jwt_secret]}"
