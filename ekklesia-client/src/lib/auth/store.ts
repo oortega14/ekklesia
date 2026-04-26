@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import apiClient, { setAccessToken } from '@/lib/api/client'
+import { getConsumer } from '@/lib/realtime/cable'
 
 const AUTH_TOKEN_MISSING_ERROR = 'AUTH_TOKEN_MISSING'
 
@@ -171,6 +172,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
     } catch {
       // best-effort
     }
+    getConsumer(null)
     get().clearSession()
   },
 }))
