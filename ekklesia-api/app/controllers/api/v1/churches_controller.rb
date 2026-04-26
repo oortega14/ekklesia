@@ -29,6 +29,7 @@ module Api
         @church.ministry = current_user.ministry unless current_user.superadmin?
         authorize @church
         if @church.save
+          Notifications::Dispatcher.call(:church_created, @church, actor: current_user)
           render json: { church: @church }, status: :created
         else
           render json: { errors: @church.errors.full_messages }, status: :unprocessable_entity

@@ -29,6 +29,8 @@ module Api
           lead_pastor = create_lead_pastor!(ministry) if lead_pastor_params.present?
         end
 
+        Notifications::Dispatcher.call(:ministry_created, ministry, actor: current_user)
+
         render json: ministry_response(ministry, lead_pastor), status: :created
       rescue ActiveRecord::RecordInvalid => e
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity

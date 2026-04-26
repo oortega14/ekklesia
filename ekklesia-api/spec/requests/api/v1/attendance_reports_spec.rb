@@ -15,6 +15,15 @@ RSpec.describe 'AttendanceReports', type: :request do
       json = JSON.parse(response.body)['attendance_report']
       expect(json['total']).to eq(160)
     end
+
+    it "enqueues a NotifyJob with kind attendance_report_submitted" do
+      create(:user, :lead_pastor, ministry: ministry) # recipient lead pastor
+      expect {
+        post "/api/v1/attendance_reports",
+          headers: auth_headers_for(assistant),
+          params: { attendance_report: { service_id: service.id, adults: 10, youth: 0, children: 0 } }
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "attendance_report_submitted"))
+    end
   end
 
   describe 'GET /api/v1/attendance_reports' do

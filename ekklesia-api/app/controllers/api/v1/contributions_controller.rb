@@ -27,7 +27,8 @@ module Api
         authorize @contribution
 
         if @contribution.save
-          render json: { contribution: @contribution.as_json.merge('type' => @contribution.type) }, status: :created
+          Notifications::Dispatcher.call(:contribution_recorded, @contribution, actor: current_user)
+          render json: { contribution: @contribution.as_json.merge("type" => @contribution.type) }, status: :created
         else
           render json: { errors: @contribution.errors.full_messages }, status: :unprocessable_entity
         end

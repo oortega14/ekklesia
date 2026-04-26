@@ -30,6 +30,24 @@ RSpec.describe 'Users', type: :request do
         params: { user: { email: 'x@x.com', password: 'pass12345', first_name: 'X', last_name: 'Y', role: 'assistant' } }
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "enqueues a NotifyJob with kind user_created" do
+      superadmin = create(:user, :superadmin)
+      lead # ensure a recipient lead_pastor exists for this ministry
+      expect {
+        post "/api/v1/users",
+          headers: auth_headers_for(superadmin),
+          params: { user: {
+            email: "newpastor#{rand(10000)}@example.com",
+            password: "Pastor123!",
+            first_name: "Nuevo",
+            last_name: "Pastor",
+            role: "pastor",
+            ministry_id: ministry.id,
+            church_id: church.id
+          } }
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "user_created"))
+    end
   end
 end
 

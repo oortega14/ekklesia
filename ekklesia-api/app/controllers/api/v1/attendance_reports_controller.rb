@@ -18,6 +18,7 @@ module Api
         @report.reported_by = current_user
         authorize @report
         if @report.save
+          Notifications::Dispatcher.call(:attendance_report_submitted, @report, actor: current_user)
           render json: { attendance_report: @report }, status: :created
         else
           render json: { errors: @report.errors.full_messages }, status: :unprocessable_entity

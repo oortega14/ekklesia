@@ -46,4 +46,18 @@ RSpec.describe 'Api::V1::Churches', type: :request do
       expect(payload['status']).to eq('active')
     end
   end
+
+  describe "POST /api/v1/churches" do
+    let(:ministry)   { create(:ministry) }
+    let(:superadmin) { create(:user, :superadmin) }
+
+    it "enqueues a NotifyJob with kind church_created" do
+      create(:user, :lead_pastor, ministry: ministry) # recipient lead pastor
+      expect {
+        post "/api/v1/churches",
+          headers: auth_headers_for(superadmin),
+          params: { church: { name: "Nueva Sede", ministry_id: ministry.id } }
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "church_created"))
+    end
+  end
 end

@@ -98,5 +98,14 @@ RSpec.describe 'Ministries', type: :request do
         params: { ministry: { name: 'Otro' } }
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "enqueues a NotifyJob with kind ministry_created" do
+      create(:user, :superadmin) # another superadmin to receive the notification
+      expect {
+        post "/api/v1/ministries",
+          headers: auth_headers_for(superadmin),
+          params: { ministry: { name: "Otro Ministerio" } }
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "ministry_created"))
+    end
   end
 end

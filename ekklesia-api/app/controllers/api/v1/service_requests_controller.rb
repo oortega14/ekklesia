@@ -19,6 +19,7 @@ module Api
         @request.church       = current_user.church unless current_user.superadmin?
         authorize @request
         if @request.save
+          Notifications::Dispatcher.call(:service_request_created, @request, actor: current_user)
           render json: { service_request: @request }, status: :created
         else
           render json: { errors: @request.errors.full_messages }, status: :unprocessable_entity
@@ -29,6 +30,7 @@ module Api
         @request = ServiceRequest.find(params[:id])
         authorize @request, :approve?
         @request.update!(status: :approved, reviewed_by: current_user)
+        Notifications::Dispatcher.call(:service_request_approved, @request, actor: current_user)
         render json: { service_request: @request }
       end
 
@@ -36,6 +38,7 @@ module Api
         @request = ServiceRequest.find(params[:id])
         authorize @request, :reject?
         @request.update!(status: :rejected, reviewed_by: current_user)
+        Notifications::Dispatcher.call(:service_request_rejected, @request, actor: current_user)
         render json: { service_request: @request }
       end
 

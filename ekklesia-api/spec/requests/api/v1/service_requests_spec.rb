@@ -14,6 +14,15 @@ RSpec.describe 'ServiceRequests', type: :request do
       expect(response).to have_http_status(:created)
       expect(JSON.parse(response.body)['service_request']['status']).to eq('pending')
     end
+
+    it "enqueues a NotifyJob with kind service_request_created" do
+      lead # ensure a recipient lead pastor exists
+      expect {
+        post "/api/v1/service_requests",
+          headers: auth_headers_for(pastor),
+          params: { service_request: { service_type: "Culto Especial", requested_for: 2.days.from_now } }
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "service_request_created"))
+    end
   end
 
   describe 'PATCH /api/v1/service_requests/:id/approve' do
@@ -28,6 +37,26 @@ RSpec.describe 'ServiceRequests', type: :request do
       sr = create(:service_request, ministry: ministry, church: church, requested_by: pastor)
       patch "/api/v1/service_requests/#{sr.id}/approve", headers: auth_headers_for(pastor)
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it "enqueues a NotifyJob with kind service_request_approved" do
+      sr = ActsAsTenant.with_tenant(ministry) do
+        create(:service_request, ministry: ministry, church: church, requested_by: pastor)
+      end
+      expect {
+        patch "/api/v1/service_requests/#{sr.id}/approve", headers: auth_headers_for(lead)
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "service_request_approved"))
+    end
+  end
+
+  describe "PATCH /api/v1/service_requests/:id/reject" do
+    it "enqueues a NotifyJob with kind service_request_rejected" do
+      sr = ActsAsTenant.with_tenant(ministry) do
+        create(:service_request, ministry: ministry, church: church, requested_by: pastor)
+      end
+      expect {
+        patch "/api/v1/service_requests/#{sr.id}/reject", headers: auth_headers_for(lead)
+      }.to have_enqueued_job(NotifyJob).with(hash_including(kind: "service_request_rejected"))
     end
   end
 end

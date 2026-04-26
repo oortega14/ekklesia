@@ -35,6 +35,8 @@ module Api
           )
         end
 
+        Notifications::Dispatcher.call(:user_created, result, actor: current_user)
+
         render json: { user: user_payload(result) }, status: :created
       rescue ActiveRecord::RecordInvalid => e
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
