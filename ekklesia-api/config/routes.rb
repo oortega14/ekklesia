@@ -29,6 +29,15 @@ Rails.application.routes.draw do
 
       get "reports/attendance",    to: "reports#attendance"
       get "reports/contributions", to: "reports#contributions"
+
+      resources :notifications, only: [ :index, :destroy ] do
+        member do
+          patch :read
+        end
+        collection do
+          post :read_all
+        end
+      end
     end
   end
 
