@@ -18,6 +18,7 @@ import {
   Bell,
   HelpCircle,
   TrendingUp,
+  Building2,
 } from "lucide-react"
 import { useState } from "react"
 import { useI18n } from "@/lib/i18n"
@@ -37,6 +38,7 @@ interface NavItem {
 const roleNavItems: Record<string, NavItem[]> = {
   superadmin: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/superadmin" },
+    { icon: Building2, labelKey: "nav.ministries", href: "/superadmin/ministries" },
     { icon: Church, labelKey: "nav.churches", href: "/superadmin/churches" },
     { icon: Users, labelKey: "nav.users", href: "/superadmin/users" },
     { icon: Shield, labelKey: "nav.roles", href: "/superadmin/roles" },

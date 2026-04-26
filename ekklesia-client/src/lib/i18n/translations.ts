@@ -86,6 +86,7 @@ export interface TranslationKeys {
   }
   nav: {
     dashboard: string
+    ministries: string
     churches: string
     users: string
     roles: string
@@ -388,6 +389,7 @@ const es: TranslationKeys = {
   },
   nav: {
     dashboard: "Panel Principal",
+    ministries: "Ministerios",
     churches: "Iglesias",
     users: "Usuarios",
     roles: "Roles",
@@ -690,6 +692,7 @@ const en: TranslationKeys = {
   },
   nav: {
     dashboard: "Dashboard",
+    ministries: "Ministries",
     churches: "Churches",
     users: "Users",
     roles: "Roles",
