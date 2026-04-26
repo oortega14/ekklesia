@@ -1,0 +1,14 @@
+class CreateNotifications < ActiveRecord::Migration[8.1]
+  def change
+    create_table :notifications do |t|
+      t.references :recipient, null: false, foreign_key: { to_table: :users }
+      t.string  :kind, null: false
+      t.jsonb   :payload, null: false, default: {}
+      t.datetime :read_at
+      t.timestamps
+    end
+    add_index :notifications, [ :recipient_id, :read_at ]
+    add_index :notifications, [ :recipient_id, :created_at ]
+    add_index :notifications, :created_at
+  end
+end

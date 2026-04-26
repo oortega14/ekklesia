@@ -3,6 +3,8 @@ class User < ApplicationRecord
   belongs_to :ministry, optional: true
   belongs_to :church, optional: true
 
+  has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
+
   enum :role, {
     superadmin:  0,
     lead_pastor: 1,
