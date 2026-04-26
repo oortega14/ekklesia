@@ -7,6 +7,12 @@ class DemoSeeder
   DEMO_PASSWORD = "Demo2026!"
   DEMO_EMAIL_DOMAIN = "demo.dev"
 
+  SERVICE_TYPES = [ "Culto Dominical", "Estudio Bíblico", "Reunión Especial" ].freeze
+
+  CONTRIBUTION_TYPE_WEIGHTS = {
+    "Tithe" => 60, "Offering" => 25, "Donation" => 10, "Firstfruit" => 3, "Covenant" => 2
+  }.freeze
+
   # Catalog of ministries and their churches/users. Order matters: the
   # first user in :pastors is the church's pastor; the rest are assistants.
   # The lead_pastor sits at the ministry level, not at any church.
@@ -150,11 +156,103 @@ class DemoSeeder
   end
 
   def create_services_for_each_church
-    puts "  [stub] create_services_for_each_church"
+    puts "Creating services for each church..."
+    @services_by_church_id = Hash.new { |h, k| h[k] = [] }
+
+    @churches_by_id.each_value do |church|
+      ActsAsTenant.with_tenant(church.ministry) do
+        # 6 past services, one per week
+        6.downto(1) do |weeks_ago|
+          svc = Service.create!(
+            ministry: church.ministry,
+            church: church,
+            service_type: rotating_service_type(weeks_ago),
+            scheduled_at: weeks_ago.weeks.ago.beginning_of_day + 10.hours,
+            status: :completed
+          )
+          @services_by_church_id[church.id] << svc
+        end
+
+        # 2 upcoming services
+        [ 1, 2 ].each do |weeks_ahead|
+          svc = Service.create!(
+            ministry: church.ministry,
+            church: church,
+            service_type: "Culto Dominical",
+            scheduled_at: weeks_ahead.weeks.from_now.beginning_of_day + 10.hours,
+            status: :scheduled
+          )
+          @services_by_church_id[church.id] << svc
+        end
+      end
+    end
+    total = @services_by_church_id.values.sum(&:length)
+    puts "  ✓ #{total} services across #{@churches_by_id.size} churches"
+  end
+
+  def rotating_service_type(week)
+    SERVICE_TYPES[week % SERVICE_TYPES.length]
   end
 
   def create_reports_and_contributions
-    puts "  [stub] create_reports_and_contributions"
+    puts "Creating attendance reports and contributions..."
+    reports_count = 0
+    contributions_count = 0
+
+    @services_by_church_id.each do |church_id, services|
+      church = @churches_by_id[church_id]
+      pastor = User.find_by(role: :pastor, church_id: church_id)
+
+      ActsAsTenant.with_tenant(church.ministry) do
+        services.each do |svc|
+          next unless svc.status == "completed"
+
+          AttendanceReport.create!(
+            service: svc,
+            ministry: church.ministry,
+            reported_by: pastor,
+            adults: rand(80..150),
+            youth: rand(20..50),
+            children: rand(15..40),
+            submitted_at: svc.scheduled_at + 4.hours
+          )
+          reports_count += 1
+
+          # 2-4 contributions per past service.
+          rand(2..4).times do
+            type_class = pick_contribution_type
+            type_class.create!(
+              service: svc,
+              ministry: church.ministry,
+              reported_by: pastor,
+              amount: contribution_amount_for(church.ministry.country),
+              submitted_at: svc.scheduled_at + 4.hours
+            )
+            contributions_count += 1
+          end
+        end
+      end
+    end
+
+    puts "  ✓ #{reports_count} attendance reports, #{contributions_count} contributions"
+  end
+
+  def pick_contribution_type
+    roll = rand(100)
+    cumulative = 0
+    CONTRIBUTION_TYPE_WEIGHTS.each do |type, weight|
+      cumulative += weight
+      return type.constantize if roll < cumulative
+    end
+    Tithe # fallback (unreachable)
+  end
+
+  def contribution_amount_for(country)
+    case country
+    when "Mexico"    then rand(500..5000)
+    when "Argentina" then rand(5_000..50_000)
+    else                  rand(100..1000)
+    end
   end
 
   def create_service_requests
