@@ -59,11 +59,13 @@ const roleNavItems: Record<string, NavItem[]> = {
     { icon: Users, labelKey: "nav.assistants", href: "/pastor/assistants" },
     { icon: Calendar, labelKey: "nav.services", href: "/pastor/services" },
     { icon: Bell, labelKey: "nav.notifications", href: "/pastor/notifications" },
+    { icon: Settings, labelKey: "nav.settings", href: "/pastor/settings" },
   ],
   assistant: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/assistant" },
     { icon: ClipboardList, labelKey: "nav.reports", href: "/assistant/reports" },
     { icon: Bell, labelKey: "nav.notifications", href: "/assistant/notifications" },
+    { icon: Settings, labelKey: "nav.settings", href: "/assistant/settings" },
     { icon: HelpCircle, labelKey: "nav.help", href: "/assistant/help" },
   ],
 }
