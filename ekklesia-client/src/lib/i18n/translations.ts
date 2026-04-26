@@ -193,32 +193,40 @@ export interface TranslationKeys {
   }
   reports: {
     title: string
-    attendanceReport: string
-    treasuryReport: string
-    submitReport: string
-    reportDate: string
-    reportType: string
-    reportStatus: string
-    pending: string
-    approved: string
-    rejected: string
-    submitted: string
-    adults: string
-    youth: string
-    children: string
-    visitors: string
-    totalAttendance: string
-    tithes: string
-    offerings: string
-    donations: string
-    specialOfferings: string
-    totalAmount: string
-    selectService: string
-    noFutureReports: string
-    todayOnly: string
-    pastDatesAllowed: string
-    uploadSuccess: string
-    uploadError: string
+    tabAttendance: string
+    tabContributions: string
+    filterPeriod: string
+    filterChurch: string
+    filterServiceType: string
+    filterContributionType: string
+    filterAllChurches: string
+    filterAllTypes: string
+    periodThisMonth: string
+    periodThisQuarter: string
+    periodThisYear: string
+    exportCsv: string
+    exporting: string
+    truncated: string
+    summaryTotalRecords: string
+    summaryTotalAttendance: string
+    summaryAveragePerService: string
+    summaryTotalAmount: string
+    summaryBreakdownByType: string
+    colService: string
+    colServiceType: string
+    colChurch: string
+    colDate: string
+    colAdults: string
+    colYouth: string
+    colChildren: string
+    colTotal: string
+    colType: string
+    colAmount: string
+    colReportedBy: string
+    colSubmittedAt: string
+    loading: string
+    empty: string
+    error: string
   }
   services: {
     title: string
@@ -480,33 +488,41 @@ const es: TranslationKeys = {
     deleteWarning: "Esta accion eliminara permanentemente el usuario y revocara todos sus permisos.",
   },
   reports: {
-    title: "Centro de Reportes",
-    attendanceReport: "Reporte de Asistencia",
-    treasuryReport: "Reporte de Tesoreria",
-    submitReport: "Enviar Reporte",
-    reportDate: "Fecha del Reporte",
-    reportType: "Tipo de Reporte",
-    reportStatus: "Estado del Reporte",
-    pending: "Pendiente",
-    approved: "Aprobado",
-    rejected: "Rechazado",
-    submitted: "Enviado",
-    adults: "Adultos",
-    youth: "Jovenes",
-    children: "Ninos",
-    visitors: "Visitantes",
-    totalAttendance: "Asistencia Total",
-    tithes: "Diezmos",
-    offerings: "Ofrendas",
-    donations: "Donaciones",
-    specialOfferings: "Ofrendas Especiales",
-    totalAmount: "Monto Total",
-    selectService: "Seleccionar Servicio",
-    noFutureReports: "No se pueden crear reportes para fechas futuras",
-    todayOnly: "Solo puede reportar para hoy o fechas anteriores",
-    pastDatesAllowed: "Fechas pasadas permitidas",
-    uploadSuccess: "Reporte enviado exitosamente",
-    uploadError: "Error al enviar el reporte",
+    title:                    "Reportes",
+    tabAttendance:            "Asistencia",
+    tabContributions:         "Finanzas",
+    filterPeriod:             "Período",
+    filterChurch:             "Iglesia",
+    filterServiceType:        "Tipo de servicio",
+    filterContributionType:   "Tipo de contribución",
+    filterAllChurches:        "Todas las iglesias",
+    filterAllTypes:           "Todos los tipos",
+    periodThisMonth:          "Este mes",
+    periodThisQuarter:        "Este trimestre",
+    periodThisYear:           "Este año",
+    exportCsv:                "Exportar CSV",
+    exporting:                "Exportando...",
+    truncated:                "Mostrando 1000 filas. Exporta CSV para el set completo.",
+    summaryTotalRecords:      "Total de registros",
+    summaryTotalAttendance:   "Total de asistencia",
+    summaryAveragePerService: "Promedio por servicio",
+    summaryTotalAmount:       "Total recaudado",
+    summaryBreakdownByType:   "Desglose por tipo",
+    colService:               "Servicio",
+    colServiceType:           "Tipo de servicio",
+    colChurch:                "Iglesia",
+    colDate:                  "Fecha",
+    colAdults:                "Adultos",
+    colYouth:                 "Jóvenes",
+    colChildren:              "Niños",
+    colTotal:                 "Total",
+    colType:                  "Tipo",
+    colAmount:                "Monto",
+    colReportedBy:            "Reportado por",
+    colSubmittedAt:           "Reportado el",
+    loading:                  "Cargando reportes...",
+    empty:                    "No hay registros para el período seleccionado.",
+    error:                    "No se pudo cargar el reporte. Inténtalo de nuevo."
   },
   services: {
     title: "Gestion de Servicios",
@@ -768,33 +784,41 @@ const en: TranslationKeys = {
     deleteWarning: "This action will permanently delete the user and revoke all their permissions.",
   },
   reports: {
-    title: "Reports Center",
-    attendanceReport: "Attendance Report",
-    treasuryReport: "Treasury Report",
-    submitReport: "Submit Report",
-    reportDate: "Report Date",
-    reportType: "Report Type",
-    reportStatus: "Report Status",
-    pending: "Pending",
-    approved: "Approved",
-    rejected: "Rejected",
-    submitted: "Submitted",
-    adults: "Adults",
-    youth: "Youth",
-    children: "Children",
-    visitors: "Visitors",
-    totalAttendance: "Total Attendance",
-    tithes: "Tithes",
-    offerings: "Offerings",
-    donations: "Donations",
-    specialOfferings: "Special Offerings",
-    totalAmount: "Total Amount",
-    selectService: "Select Service",
-    noFutureReports: "Cannot create reports for future dates",
-    todayOnly: "You can only report for today or past dates",
-    pastDatesAllowed: "Past dates allowed",
-    uploadSuccess: "Report submitted successfully",
-    uploadError: "Error submitting report",
+    title:                    "Reports",
+    tabAttendance:            "Attendance",
+    tabContributions:         "Finance",
+    filterPeriod:             "Period",
+    filterChurch:             "Church",
+    filterServiceType:        "Service type",
+    filterContributionType:   "Contribution type",
+    filterAllChurches:        "All churches",
+    filterAllTypes:           "All types",
+    periodThisMonth:          "This month",
+    periodThisQuarter:        "This quarter",
+    periodThisYear:           "This year",
+    exportCsv:                "Export CSV",
+    exporting:                "Exporting...",
+    truncated:                "Showing 1000 rows. Export CSV for the full dataset.",
+    summaryTotalRecords:      "Total records",
+    summaryTotalAttendance:   "Total attendance",
+    summaryAveragePerService: "Average per service",
+    summaryTotalAmount:       "Total collected",
+    summaryBreakdownByType:   "Breakdown by type",
+    colService:               "Service",
+    colServiceType:           "Service type",
+    colChurch:                "Church",
+    colDate:                  "Date",
+    colAdults:                "Adults",
+    colYouth:                 "Youth",
+    colChildren:              "Children",
+    colTotal:                 "Total",
+    colType:                  "Type",
+    colAmount:                "Amount",
+    colReportedBy:            "Reported by",
+    colSubmittedAt:           "Submitted at",
+    loading:                  "Loading reports...",
+    empty:                    "No records for the selected period.",
+    error:                    "Could not load the report. Please try again."
   },
   services: {
     title: "Service Management",
