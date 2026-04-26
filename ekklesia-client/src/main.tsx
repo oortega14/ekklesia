@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { routeTree } from './routeTree.gen'
 import { AuthProvider } from './lib/auth/context'
 import { I18nProvider } from './lib/i18n'
+import { NotificationsProvider } from '@/lib/notifications/provider'
 import './styles/globals.css'
 
 const queryClient = new QueryClient()
@@ -22,7 +23,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AuthProvider>
-          <RouterProvider router={router} />
+          <NotificationsProvider>
+            <RouterProvider router={router} />
+          </NotificationsProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>

@@ -1,9 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Bell, Menu, User, ChevronDown } from "lucide-react"
+import { Menu, User, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { LanguageSwitcher } from "./language-switcher"
+import { NotificationsBell } from "@/components/dashboard/notifications-bell"
 import { useI18n } from "@/lib/i18n"
 import { useAuth } from '@/lib/auth/context'
 
@@ -15,7 +16,6 @@ interface HeaderProps {
 }
 
 export function Header({ title, userName: userNameProp, userRole: userRoleProp, onMenuClick }: HeaderProps) {
-  const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const { user, logout } = useAuth()
   const { t } = useI18n()
@@ -29,12 +29,6 @@ export function Header({ title, userName: userNameProp, userRole: userRoleProp, 
 
   const userName = userNameProp ?? user?.full_name ?? ''
   const userRole = userRoleProp ?? (user ? (ROLE_LABELS[user.role] ?? user.role) : '')
-
-  const notifications = [
-    { id: 1, title: t("notifications.newChurch"), time: t("time.minutesAgo").replace("{count}", "5"), unread: true },
-    { id: 2, title: t("notifications.newReport"), time: t("time.hoursAgo").replace("{count}", "1"), unread: true },
-    { id: 3, title: t("notifications.newPastor"), time: t("time.hoursAgo").replace("{count}", "2"), unread: false },
-  ]
 
   const handleLogout = async () => {
     await logout()
@@ -71,55 +65,7 @@ export function Header({ title, userName: userNameProp, userRole: userRoleProp, 
         <LanguageSwitcher />
 
         {/* Notifications */}
-        <div className="relative">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          </motion.button>
-
-          {/* Notifications dropdown */}
-          {showNotifications && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 top-full mt-2 w-80 bg-[#0f2035] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
-            >
-              <div className="p-3 border-b border-white/10">
-                <h3 className="text-sm font-semibold text-white">{t("notifications.title")}</h3>
-              </div>
-              <div className="max-h-72 overflow-y-auto">
-                {notifications.map((notif, index) => (
-                  <motion.div
-                    key={notif.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="p-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-2 h-2 rounded-full mt-2 ${notif.unread ? 'bg-blue-500' : 'bg-white/20'}`} />
-                      <div className="flex-1">
-                        <p className="text-sm text-white">{notif.title}</p>
-                        <p className="text-xs text-blue-300/50 mt-0.5">{notif.time}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-              <div className="p-2 border-t border-white/10">
-                <button className="w-full py-2 text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                  {t("header.seeAllNotifications")}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </div>
+        <NotificationsBell />
 
         {/* Profile */}
         <div className="relative">
