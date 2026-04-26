@@ -13,6 +13,7 @@ export interface UserRow {
   ministry_name: string | null
   church_id: number | null
   church_name: string | null
+  locale: 'es' | 'en'
 }
 
 export interface ListUsersParams {
@@ -52,6 +53,18 @@ export async function createUser(payload: CreateUserPayload): Promise<UserRow> {
 
 export async function updateUser(id: number, payload: UpdateUserPayload): Promise<UserRow> {
   const { data } = await apiClient.patch<{ user: UserRow }>(`/api/v1/users/${id}`, { user: payload })
+  return data.user
+}
+
+export interface UpdateProfilePayload {
+  first_name?: string
+  last_name?: string
+  phone?: string
+  locale?: 'es' | 'en'
+}
+
+export async function updateProfile(userId: number, payload: UpdateProfilePayload): Promise<UserRow> {
+  const { data } = await apiClient.patch<{ user: UserRow }>(`/api/v1/users/${userId}`, { user: payload })
   return data.user
 }
 

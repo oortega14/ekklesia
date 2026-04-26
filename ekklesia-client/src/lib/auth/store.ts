@@ -14,6 +14,7 @@ export interface AuthUser {
   last_name: string
   full_name: string
   phone: string | null
+  locale: 'es' | 'en'
 }
 
 interface AuthStoreState {
@@ -27,6 +28,8 @@ interface AuthStoreState {
   finalizeAuth: (accessTokenValue: string, refreshTokenValue?: string) => Promise<void>
   loginRaw: (email: string, password: string) => Promise<void>
   logoutRaw: () => Promise<void>
+  applyTokensFromPasswordChange: (accessToken: string, refreshToken: string) => void
+  updateUserLocally: (patch: Partial<AuthUser>) => void
 }
 
 const REFRESH_KEY = 'ekklesia_refresh'
@@ -174,5 +177,15 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
     }
     getConsumer(null)
     get().clearSession()
+  },
+
+  applyTokensFromPasswordChange: (accessToken, refreshToken) => {
+    localStorage.setItem(REFRESH_KEY, refreshToken)
+    get().updateToken(accessToken)
+    // No /me refetch: user data did not change, only the tokens rotated.
+  },
+
+  updateUserLocally: (patch) => {
+    set((state) => ({ user: state.user ? { ...state.user, ...patch } : null }))
   },
 }))
