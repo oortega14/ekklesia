@@ -35,27 +35,27 @@ RSpec.describe "Api::V1::Reports", type: :request do
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       totals = body["rows"].map { |r| r["total"] }
-      expect(totals).to match_array([100, 50, 999])
+      expect(totals).to match_array([ 100, 50, 999 ])
     end
 
     it "lead_pastor sees only their ministry rows" do
       get "/api/v1/reports/attendance", headers: auth_headers_for(lead_a), params: { period: "this_month" }
       body = JSON.parse(response.body)
       totals = body["rows"].map { |r| r["total"] }
-      expect(totals).to match_array([100, 50])
+      expect(totals).to match_array([ 100, 50 ])
     end
 
     it "pastor sees only their church rows" do
       get "/api/v1/reports/attendance", headers: auth_headers_for(pastor_a1), params: { period: "this_month" }
       body = JSON.parse(response.body)
       totals = body["rows"].map { |r| r["total"] }
-      expect(totals).to eq([100])
+      expect(totals).to eq([ 100 ])
     end
 
     it "assistant sees only their church rows" do
       get "/api/v1/reports/attendance", headers: auth_headers_for(asst_a1), params: { period: "this_month" }
       body = JSON.parse(response.body)
-      expect(body["rows"].map { |r| r["total"] }).to eq([100])
+      expect(body["rows"].map { |r| r["total"] }).to eq([ 100 ])
     end
 
     it "row payload includes the documented keys" do
@@ -92,7 +92,7 @@ RSpec.describe "Api::V1::Reports", type: :request do
           headers: auth_headers_for(superadmin),
           params:  { period: "this_month", church_id: church_a1.id }
       rows = JSON.parse(response.body)["rows"]
-      expect(rows.map { |r| r["church_id"] }.uniq).to eq([church_a1.id])
+      expect(rows.map { |r| r["church_id"] }.uniq).to eq([ church_a1.id ])
     end
 
     it "pastor's church_id query param is ignored when it points to another church" do
@@ -100,7 +100,7 @@ RSpec.describe "Api::V1::Reports", type: :request do
           headers: auth_headers_for(pastor_a1),
           params:  { period: "this_month", church_id: church_a2.id }
       rows = JSON.parse(response.body)["rows"]
-      expect(rows.map { |r| r["church_id"] }.uniq).to eq([church_a1.id])
+      expect(rows.map { |r| r["church_id"] }.uniq).to eq([ church_a1.id ])
     end
 
     it "lead_pastor's church_id pointing to another ministry is ignored" do
@@ -109,7 +109,7 @@ RSpec.describe "Api::V1::Reports", type: :request do
           params:  { period: "this_month", church_id: church_b.id }
       rows = JSON.parse(response.body)["rows"]
       church_ids = rows.map { |r| r["church_id"] }.uniq
-      expect(church_ids).to all(satisfy { |id| [church_a1.id, church_a2.id].include?(id) })
+      expect(church_ids).to all(satisfy { |id| [ church_a1.id, church_a2.id ].include?(id) })
     end
 
     it "service_type narrows the rows" do
@@ -195,25 +195,25 @@ RSpec.describe "Api::V1::Reports", type: :request do
       get "/api/v1/reports/contributions", headers: auth_headers_for(superadmin), params: { period: "this_month" }
       expect(response).to have_http_status(:ok)
       amounts = JSON.parse(response.body)["rows"].map { |r| r["amount"] }
-      expect(amounts).to match_array([100.0, 50.0, 30.0, 999.0])
+      expect(amounts).to match_array([ 100.0, 50.0, 30.0, 999.0 ])
     end
 
     it "lead_pastor sees only their ministry rows" do
       get "/api/v1/reports/contributions", headers: auth_headers_for(lead_a), params: { period: "this_month" }
       amounts = JSON.parse(response.body)["rows"].map { |r| r["amount"] }
-      expect(amounts).to match_array([100.0, 50.0, 30.0])
+      expect(amounts).to match_array([ 100.0, 50.0, 30.0 ])
     end
 
     it "pastor sees only their church rows" do
       get "/api/v1/reports/contributions", headers: auth_headers_for(pastor_a1), params: { period: "this_month" }
       amounts = JSON.parse(response.body)["rows"].map { |r| r["amount"] }
-      expect(amounts).to match_array([100.0, 50.0])
+      expect(amounts).to match_array([ 100.0, 50.0 ])
     end
 
     it "assistant sees only their church rows" do
       get "/api/v1/reports/contributions", headers: auth_headers_for(asst_a1), params: { period: "this_month" }
       amounts = JSON.parse(response.body)["rows"].map { |r| r["amount"] }
-      expect(amounts).to match_array([100.0, 50.0])
+      expect(amounts).to match_array([ 100.0, 50.0 ])
     end
 
     it "row payload includes the documented keys" do
@@ -251,7 +251,7 @@ RSpec.describe "Api::V1::Reports", type: :request do
           headers: auth_headers_for(superadmin),
           params:  { period: "this_month", contribution_type: "Offering" }
       rows = JSON.parse(response.body)["rows"]
-      expect(rows.map { |r| r["type"] }.uniq).to eq(["Offering"])
+      expect(rows.map { |r| r["type"] }.uniq).to eq([ "Offering" ])
     end
 
     it "format=csv returns text/csv with attachment header" do
