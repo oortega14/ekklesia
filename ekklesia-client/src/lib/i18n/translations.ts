@@ -67,14 +67,7 @@ export interface TranslationKeys {
     forgotPassword: string
     rememberMe: string
     signIn: string
-    signUp: string
-    createAccount: string
-    noAccount: string
-    alreadyHaveAccount: string
-    signupSubtitle: string
     invalidCredentials: string
-    signupFailed: string
-    passwordMismatch: string
     sessionStartFailed: string
     signOut: string
     welcome: string
@@ -376,14 +369,7 @@ const es: TranslationKeys = {
     forgotPassword: "Olvide mi contrasena",
     rememberMe: "Recordarme",
     signIn: "Ingresar",
-    signUp: "Registrarme",
-    createAccount: "Crear cuenta",
-    noAccount: "No tienes cuenta?",
-    alreadyHaveAccount: "Ya tienes cuenta?",
-    signupSubtitle: "Crea tu ministerio y comienza a gestionar",
     invalidCredentials: "Credenciales incorrectas. Intenta de nuevo.",
-    signupFailed: "No se pudo completar el registro. Revisa tus datos.",
-    passwordMismatch: "Las contrasenas no coinciden",
     sessionStartFailed: "No se pudo iniciar la sesion. Intenta nuevamente.",
     signOut: "Salir",
     welcome: "Bienvenido de vuelta",
@@ -685,14 +671,7 @@ const en: TranslationKeys = {
     forgotPassword: "Forgot password",
     rememberMe: "Remember me",
     signIn: "Sign In",
-    signUp: "Sign Up",
-    createAccount: "Create account",
-    noAccount: "Don't have an account?",
-    alreadyHaveAccount: "Already have an account?",
-    signupSubtitle: "Create your ministry and start managing",
     invalidCredentials: "Invalid credentials. Please try again.",
-    signupFailed: "Could not complete sign up. Please check your data.",
-    passwordMismatch: "Passwords do not match",
     sessionStartFailed: "Could not start your session. Please try again.",
     signOut: "Sign Out",
     welcome: "Welcome back",

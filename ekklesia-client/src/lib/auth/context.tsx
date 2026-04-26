@@ -3,19 +3,17 @@ import { useNavigate } from '@tanstack/react-router'
 import { setAuthCallbacks } from '@/lib/api/client'
 import {
   AuthUser,
-  SignupPayload,
   rolePath,
   useAuthStore,
 } from '@/lib/auth/store'
 
-export type { AuthUser, SignupPayload } from '@/lib/auth/store'
+export type { AuthUser } from '@/lib/auth/store'
 
 interface AuthContextType {
   user: AuthUser | null
   accessToken: string | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  signup: (payload: SignupPayload) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -46,7 +44,6 @@ export function useAuth(): AuthContextType {
   const accessToken = useAuthStore((state) => state.accessToken)
   const isLoading = useAuthStore((state) => state.isLoading)
   const loginRaw = useAuthStore((state) => state.loginRaw)
-  const signupRaw = useAuthStore((state) => state.signupRaw)
   const logoutRaw = useAuthStore((state) => state.logoutRaw)
 
   const login = useCallback(
@@ -60,17 +57,6 @@ export function useAuth(): AuthContextType {
     [loginRaw, navigate]
   )
 
-  const signup = useCallback(
-    async (payload: SignupPayload) => {
-      await signupRaw(payload)
-      const currentUser = useAuthStore.getState().user
-      if (currentUser) {
-        navigate({ to: rolePath(currentUser.role) })
-      }
-    },
-    [signupRaw, navigate]
-  )
-
   const logout = useCallback(async () => {
     await logoutRaw()
     navigate({ to: '/', replace: true })
@@ -81,7 +67,6 @@ export function useAuth(): AuthContextType {
     accessToken,
     isLoading,
     login,
-    signup,
     logout,
   }
 }

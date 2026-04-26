@@ -15,17 +15,6 @@ export interface AuthUser {
   phone: string | null
 }
 
-export interface SignupPayload {
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  ministryName: string
-  country: string
-  city: string
-  password: string
-}
-
 interface AuthStoreState {
   user: AuthUser | null
   accessToken: string | null
@@ -36,7 +25,6 @@ interface AuthStoreState {
   hydrate: () => Promise<void>
   finalizeAuth: (accessTokenValue: string, refreshTokenValue?: string) => Promise<void>
   loginRaw: (email: string, password: string) => Promise<void>
-  signupRaw: (payload: SignupPayload) => Promise<void>
   logoutRaw: () => Promise<void>
 }
 
@@ -175,33 +163,6 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
     }
 
     await get().finalizeAuth(accessToken, response.data?.refresh_token)
-  },
-
-  signupRaw: async (payload) => {
-    const response = await apiClient.post('/api/v1/auth/signup', {
-      email: payload.email,
-      login: payload.email,
-      password: payload.password,
-      password_confirm: payload.password,
-      'password-confirm': payload.password,
-      first_name: payload.firstName,
-      last_name: payload.lastName,
-      phone: payload.phone,
-      ministry_name: payload.ministryName,
-      country: payload.country,
-      city: payload.city,
-    })
-
-    const accessToken = extractAccessToken(
-      response.data,
-      response.headers as Record<string, unknown>
-    )
-    if (accessToken) {
-      await get().finalizeAuth(accessToken, response.data?.refresh_token)
-      return
-    }
-
-    await get().loginRaw(payload.email, payload.password)
   },
 
   logoutRaw: async () => {
