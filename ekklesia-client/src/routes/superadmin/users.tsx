@@ -1,18 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { Header } from "@/components/dashboard/header"
-import { ConfirmModal } from "@/components/dashboard/confirm-modal"
-import { FormModal } from "@/components/dashboard/form-modal"
-import { FormInput, FormSelect, FormFieldGroup } from "@/components/dashboard/form-input"
-import { Button } from "@/components/ui/button"
-import { useAuthStore, ROLE_LABELS } from "@/lib/auth/store"
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Sidebar } from '@/components/dashboard/sidebar'
+import { Header } from '@/components/dashboard/header'
+import { ConfirmModal } from '@/components/dashboard/confirm-modal'
+import { FormModal } from '@/components/dashboard/form-modal'
+import { FormInput, FormSelect, FormFieldGroup } from '@/components/dashboard/form-input'
+import { Button } from '@/components/ui/button'
+import { useAuthStore, ROLE_LABELS } from '@/lib/auth/store'
 import {
   Users,
   Plus,
   Search,
-  Filter,
   Mail,
   Phone,
   Shield,
@@ -22,110 +22,137 @@ import {
   Edit2,
   Trash2,
   Eye,
-  UserCheck,
-  UserX,
   Crown
-} from "lucide-react"
+} from 'lucide-react'
+import {
+  listUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  type UserRow,
+  type UserRole
+} from '@/lib/api/users'
+import { listChurches } from '@/lib/api/churches'
 
-// Mock data
-const mockUsers = [
-  { id: 1, name: "Carlos Mendez", email: "carlos@iglesia.com", role: "pastor_principal", church: "Iglesia Central", status: "active", lastLogin: "Hace 2 horas", avatar: null },
-  { id: 2, name: "Maria Garcia", email: "maria@iglesia.com", role: "pastor_principal", church: "Iglesia del Norte", status: "active", lastLogin: "Hace 1 dia", avatar: null },
-  { id: 3, name: "Juan Lopez", email: "juan@iglesia.com", role: "pastor", church: "Iglesia del Sur", status: "active", lastLogin: "Hace 3 horas", avatar: null },
-  { id: 4, name: "Ana Rodriguez", email: "ana@iglesia.com", role: "pastor", church: "Iglesia Esperanza", status: "inactive", lastLogin: "Hace 5 dias", avatar: null },
-  { id: 5, name: "Pedro Sanchez", email: "pedro@iglesia.com", role: "ayudante", church: "Iglesia Central", status: "active", lastLogin: "Hace 6 horas", avatar: null },
-  { id: 6, name: "Laura Martinez", email: "laura@iglesia.com", role: "ayudante", church: "Iglesia del Norte", status: "active", lastLogin: "Hace 12 horas", avatar: null },
-  { id: 7, name: "Roberto Torres", email: "roberto@iglesia.com", role: "pastor_principal", church: "Iglesia Gracia", status: "active", lastLogin: "Hace 1 hora", avatar: null },
-  { id: 8, name: "Sofia Hernandez", email: "sofia@iglesia.com", role: "ayudante", church: "Iglesia del Sur", status: "pending", lastLogin: "Nunca", avatar: null },
-]
-
-const roleOptions = [
-  { value: "pastor_principal", label: "Pastor Principal" },
-  { value: "pastor", label: "Pastor" },
-  { value: "ayudante", label: "Ayudante" },
-]
-
-const churchOptions = [
-  { value: "central", label: "Iglesia Central" },
-  { value: "norte", label: "Iglesia del Norte" },
-  { value: "sur", label: "Iglesia del Sur" },
-  { value: "esperanza", label: "Iglesia Esperanza" },
-]
-
-const roleLabels: Record<string, string> = {
-  pastor_principal: "Pastor Principal",
-  pastor: "Pastor",
-  ayudante: "Ayudante"
+const roleBadgeColors: Record<UserRole, string> = {
+  lead_pastor: 'bg-purple-100 text-purple-700 border-purple-200',
+  pastor:      'bg-blue-100 text-blue-700 border-blue-200',
+  assistant:   'bg-cyan-100 text-cyan-700 border-cyan-200'
 }
 
-const roleBadgeColors: Record<string, string> = {
-  pastor_principal: "bg-purple-100 text-purple-700 border-purple-200",
-  pastor: "bg-blue-100 text-blue-700 border-blue-200",
-  ayudante: "bg-cyan-100 text-cyan-700 border-cyan-200"
+function getRoleIcon(role: UserRole) {
+  switch (role) {
+    case 'lead_pastor': return <Crown className="w-4 h-4" />
+    case 'pastor':      return <Shield className="w-4 h-4" />
+    default:            return <User className="w-4 h-4" />
+  }
+}
+
+function getInitials(name: string) {
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase()
+}
+
+interface FormData {
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  password: string
+  role: UserRole | ''
+  church_id: number | ''
+}
+
+const emptyForm: FormData = {
+  first_name: '', last_name: '', email: '', phone: '', password: '', role: '', church_id: ''
 }
 
 function SuperAdminUsuarios() {
   const { user } = useAuthStore()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const qc = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null)
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null)
   const [activeMenu, setActiveMenu] = useState<number | null>(null)
+  const [formData, setFormData] = useState<FormData>(emptyForm)
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
-    church: "",
-    password: ""
+  const usersQ    = useQuery({ queryKey: ['users'],    queryFn: () => listUsers({ perPage: 100 }) })
+  const churchesQ = useQuery({ queryKey: ['churches'], queryFn: () => listChurches({ perPage: 100 }) })
+
+  const createM = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsCreateModalOpen(false); setFormData(emptyForm) }
+  })
+  const updateM = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateUser>[1] }) => updateUser(id, payload),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsEditModalOpen(false); setFormData(emptyForm); setSelectedUser(null) }
+  })
+  const deleteM = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setIsDeleteModalOpen(false); setSelectedUser(null) }
   })
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.church.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesRole = roleFilter === "all" || user.role === roleFilter
-    return matchesSearch && matchesRole
-  })
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    return (usersQ.data ?? []).filter((u) => {
+      const matchesQ = !q ||
+        u.full_name.toLowerCase().includes(q) ||
+        (u.email ?? '').toLowerCase().includes(q) ||
+        (u.church_name ?? '').toLowerCase().includes(q)
+      const matchesRole = roleFilter === 'all' || u.role === roleFilter
+      return matchesQ && matchesRole
+    })
+  }, [usersQ.data, searchQuery, roleFilter])
 
-  const handleDelete = (user: typeof mockUsers[0]) => {
-    setSelectedUser(user)
-    setIsDeleteModalOpen(true)
-    setActiveMenu(null)
-  }
+  const churchOptions = (churchesQ.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))
+  const roleOptions: Array<{ value: UserRole; label: string }> = [
+    { value: 'lead_pastor', label: ROLE_LABELS.lead_pastor },
+    { value: 'pastor',      label: ROLE_LABELS.pastor },
+    { value: 'assistant',   label: ROLE_LABELS.assistant }
+  ]
 
-  const handleEdit = (user: typeof mockUsers[0]) => {
-    setSelectedUser(user)
+  const openCreate = () => { setFormData(emptyForm); setIsCreateModalOpen(true) }
+  const openEdit = (u: UserRow) => {
+    setSelectedUser(u)
     setFormData({
-      name: user.name,
-      email: user.email,
-      phone: "",
-      role: user.role,
-      church: user.church.toLowerCase().replace(" ", ""),
-      password: ""
+      first_name: u.first_name,
+      last_name:  u.last_name,
+      email:      u.email ?? '',
+      phone:      '',
+      password:   '',
+      role:       u.role,
+      church_id:  u.church_id ?? ''
     })
     setIsEditModalOpen(true)
     setActiveMenu(null)
   }
+  const openDelete = (u: UserRow) => { setSelectedUser(u); setIsDeleteModalOpen(true); setActiveMenu(null) }
 
-  const resetForm = () => {
-    setFormData({ name: "", email: "", phone: "", role: "", church: "", password: "" })
+  const submitCreate = () => {
+    if (!formData.role) return
+    createM.mutate({
+      email:      formData.email,
+      password:   formData.password,
+      first_name: formData.first_name,
+      last_name:  formData.last_name,
+      phone:      formData.phone || undefined,
+      role:       formData.role,
+      church_id:  formData.church_id === '' ? undefined : Number(formData.church_id)
+    })
   }
-
-  const getInitials = (name: string) => {
-    return name.split(" ").map(n => n[0]).join("").toUpperCase()
-  }
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "pastor_principal": return <Crown className="w-4 h-4" />
-      case "pastor": return <Shield className="w-4 h-4" />
-      default: return <User className="w-4 h-4" />
-    }
+  const submitUpdate = () => {
+    if (!selectedUser) return
+    updateM.mutate({
+      id: selectedUser.id,
+      payload: {
+        first_name: formData.first_name,
+        last_name:  formData.last_name,
+        phone:      formData.phone || undefined,
+        church_id:  formData.church_id === '' ? undefined : Number(formData.church_id)
+      }
+    })
   }
 
   return (
@@ -140,59 +167,23 @@ function SuperAdminUsuarios() {
         />
 
         <main className="p-6 bg-white">
-          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
           >
-            {[
-              { label: "Total Usuarios", value: mockUsers.length, icon: Users, color: "blue" },
-              { label: "Activos", value: mockUsers.filter(u => u.status === "active").length, icon: UserCheck, color: "green" },
-              { label: "Inactivos", value: mockUsers.filter(u => u.status === "inactive").length, icon: UserX, color: "red" },
-              { label: "Pendientes", value: mockUsers.filter(u => u.status === "pending").length, icon: User, color: "amber" },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex items-center gap-4"
-              >
-                <div className={`p-3 rounded-xl ${
-                  stat.color === 'blue'
-                    ? 'bg-blue-100'
-                    : stat.color === 'green'
-                      ? 'bg-emerald-100'
-                      : stat.color === 'red'
-                        ? 'bg-red-100'
-                        : 'bg-amber-100'
-                }`}>
-                  <stat.icon className={`w-5 h-5 ${
-                    stat.color === 'blue'
-                      ? 'text-blue-700'
-                      : stat.color === 'green'
-                        ? 'text-emerald-700'
-                        : stat.color === 'red'
-                          ? 'text-red-700'
-                          : 'text-amber-700'
-                  }`} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                  <p className="text-sm text-slate-500">{stat.label}</p>
-                </div>
-              </motion.div>
-            ))}
+            <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-blue-100">
+                <Users className="w-5 h-5 text-blue-700" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{usersQ.data?.length ?? 0}</p>
+                <p className="text-sm text-slate-500">Total Usuarios</p>
+              </div>
+            </div>
           </motion.div>
 
-          {/* Toolbar */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex flex-col md:flex-row gap-4 mb-6"
-          >
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
@@ -205,295 +196,183 @@ function SuperAdminUsuarios() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Role Filter */}
               <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-300">
-                {["all", "pastor_principal", "pastor", "ayudante"].map((role) => (
+                {(['all', 'lead_pastor', 'pastor', 'assistant'] as const).map((role) => (
                   <button
                     key={role}
                     onClick={() => setRoleFilter(role)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      roleFilter === role
-                        ? "bg-blue-100 text-blue-700"
-                        : "text-slate-500 hover:text-slate-800"
+                      roleFilter === role ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    {role === "all" ? "Todos" : roleLabels[role]}
+                    {role === 'all' ? 'Todos' : ROLE_LABELS[role]}
                   </button>
                 ))}
               </div>
 
-              <Button
-                onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
-                variant="blue" className="gap-2"
-              >
+              <Button onClick={openCreate} variant="blue" className="gap-2">
                 <Plus className="w-4 h-4" />
                 Nuevo Usuario
               </Button>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Users Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden"
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Usuario</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rol</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Iglesia</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Ultimo Acceso</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredUsers.map((user, index) => (
-                    <motion.tr
-                      key={user.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + index * 0.03 }}
-                      className="hover:bg-slate-50 transition-colors group"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center text-sm font-medium text-blue-900">
-                            {getInitials(user.name)}
+          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            {usersQ.isLoading && <div className="p-6 text-slate-500">Cargando...</div>}
+            {usersQ.error && <div className="p-6 text-red-700">Error al cargar usuarios.</div>}
+            {!usersQ.isLoading && !usersQ.error && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Usuario</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rol</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Iglesia</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filtered.map((u) => (
+                      <tr key={u.id} className="hover:bg-slate-50 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center text-sm font-medium text-blue-900">
+                              {getInitials(u.full_name)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-900">{u.full_name}</p>
+                              <p className="text-xs text-slate-500">{u.email ?? '—'}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-900">{user.name}</p>
-                            <p className="text-xs text-slate-500">{user.email}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${roleBadgeColors[u.role]}`}>
+                            {getRoleIcon(u.role)}
+                            {ROLE_LABELS[u.role]}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-sm text-slate-700">
+                            <Church className="w-4 h-4 text-slate-400" />
+                            {u.church_name ?? '—'}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${roleBadgeColors[user.role]}`}>
-                          {getRoleIcon(user.role)}
-                          {roleLabels[user.role]}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-slate-700">
-                          <Church className="w-4 h-4 text-slate-400" />
-                          {user.church}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          user.status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : user.status === "pending"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-red-100 text-red-700"
-                        }`}>
-                          {user.status === "active" ? "Activo" : user.status === "pending" ? "Pendiente" : "Inactivo"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        {user.lastLogin}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="relative flex justify-end">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setActiveMenu(activeMenu === user.id ? null : user.id)}
-                            className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </motion.button>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="relative flex justify-end">
+                            <button
+                              onClick={() => setActiveMenu(activeMenu === u.id ? null : u.id)}
+                              className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
 
-                          <AnimatePresence>
-                            {activeMenu === user.id && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="absolute right-0 top-full mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-20"
-                              >
-                                <button
-                                  onClick={() => { console.log("View", user); setActiveMenu(null); }}
-                                  className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            <AnimatePresence>
+                              {activeMenu === u.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                  className="absolute right-0 top-full mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-20"
                                 >
-                                  <Eye className="w-4 h-4" />
-                                  Ver perfil
-                                </button>
-                                <button
-                                  onClick={() => handleEdit(user)}
-                                  className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                  Editar
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(user)}
-                                  className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Eliminar
-                                </button>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
+                                  <button
+                                    onClick={() => { console.log('View', u); setActiveMenu(null) }}
+                                    className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                    Ver perfil
+                                  </button>
+                                  <button
+                                    onClick={() => openEdit(u)}
+                                    className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                    Editar
+                                  </button>
+                                  <button
+                                    onClick={() => openDelete(u)}
+                                    className="w-full px-4 py-2.5 flex items-center gap-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Eliminar
+                                  </button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                      <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-500">Sin resultados.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </main>
       </div>
 
-      {/* Create Modal */}
       <FormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={() => console.log("Create user:", formData)}
+        onSubmit={submitCreate}
         title="Nuevo Usuario"
         subtitle="Crea un nuevo usuario en el sistema"
         icon={<User className="w-6 h-6" />}
-        submitText="Crear Usuario"
+        submitText={createM.isPending ? 'Creando...' : 'Crear Usuario'}
         size="lg"
       >
         <div className="space-y-4">
           <FormFieldGroup>
-            <FormInput
-              label="Nombre Completo"
-              name="name"
-              placeholder="Ej: Juan Perez"
-              value={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-              icon={User}
-              required
-            />
-            <FormInput
-              label="Correo Electronico"
-              name="email"
-              type="email"
-              placeholder="usuario@ejemplo.com"
-              value={formData.email}
-              onChange={(value) => setFormData({ ...formData, email: value })}
-              icon={Mail}
-              required
-            />
+            <FormInput label="Nombre" name="first_name" placeholder="Juan" value={formData.first_name} onChange={(v) => setFormData({ ...formData, first_name: v })} icon={User} required />
+            <FormInput label="Apellido" name="last_name" placeholder="Perez" value={formData.last_name} onChange={(v) => setFormData({ ...formData, last_name: v })} icon={User} required />
           </FormFieldGroup>
-
           <FormFieldGroup>
-            <FormInput
-              label="Telefono"
-              name="phone"
-              type="tel"
-              placeholder="+52 55 1234 5678"
-              value={formData.phone}
-              onChange={(value) => setFormData({ ...formData, phone: value })}
-              icon={Phone}
-            />
-            <FormInput
-              label="Contrasena"
-              name="password"
-              type="password"
-              placeholder="Minimo 8 caracteres"
-              value={formData.password}
-              onChange={(value) => setFormData({ ...formData, password: value })}
-              required
-            />
+            <FormInput label="Correo Electronico" name="email" type="email" placeholder="usuario@ejemplo.com" value={formData.email} onChange={(v) => setFormData({ ...formData, email: v })} icon={Mail} required />
+            <FormInput label="Telefono" name="phone" type="tel" placeholder="+52 55 1234 5678" value={formData.phone} onChange={(v) => setFormData({ ...formData, phone: v })} icon={Phone} />
           </FormFieldGroup>
-
           <FormFieldGroup>
-            <FormSelect
-              label="Rol"
-              name="role"
-              value={formData.role}
-              onChange={(value) => setFormData({ ...formData, role: value })}
-              options={roleOptions}
-              icon={Shield}
-              required
-            />
-            <FormSelect
-              label="Iglesia Asignada"
-              name="church"
-              value={formData.church}
-              onChange={(value) => setFormData({ ...formData, church: value })}
-              options={churchOptions}
-              icon={Church}
-              required
-            />
+            <FormInput label="Contrasena" name="password" type="password" placeholder="Minimo 8 caracteres" value={formData.password} onChange={(v) => setFormData({ ...formData, password: v })} required />
+            <FormSelect label="Rol" name="role" value={formData.role} onChange={(v) => setFormData({ ...formData, role: v as UserRole })} options={roleOptions} icon={Shield} required />
           </FormFieldGroup>
+          <FormFieldGroup>
+            <FormSelect label="Iglesia" name="church_id" value={String(formData.church_id)} onChange={(v) => setFormData({ ...formData, church_id: v ? Number(v) : '' })} options={churchOptions} icon={Church} />
+          </FormFieldGroup>
+          {createM.error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">Error al crear usuario.</div>}
         </div>
       </FormModal>
 
-      {/* Edit Modal */}
       <FormModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSubmit={() => console.log("Update user:", formData)}
+        onSubmit={submitUpdate}
         title="Editar Usuario"
-        subtitle={selectedUser?.name}
+        subtitle={selectedUser?.full_name}
         icon={<User className="w-6 h-6" />}
-        submitText="Guardar Cambios"
+        submitText={updateM.isPending ? 'Guardando...' : 'Guardar Cambios'}
         size="lg"
       >
         <div className="space-y-4">
           <FormFieldGroup>
-            <FormInput
-              label="Nombre Completo"
-              name="name"
-              placeholder="Ej: Juan Perez"
-              value={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-              icon={User}
-              required
-            />
-            <FormInput
-              label="Correo Electronico"
-              name="email"
-              type="email"
-              placeholder="usuario@ejemplo.com"
-              value={formData.email}
-              onChange={(value) => setFormData({ ...formData, email: value })}
-              icon={Mail}
-              required
-            />
+            <FormInput label="Nombre" name="first_name" placeholder="Juan" value={formData.first_name} onChange={(v) => setFormData({ ...formData, first_name: v })} icon={User} required />
+            <FormInput label="Apellido" name="last_name" placeholder="Perez" value={formData.last_name} onChange={(v) => setFormData({ ...formData, last_name: v })} icon={User} required />
           </FormFieldGroup>
-
           <FormFieldGroup>
-            <FormSelect
-              label="Rol"
-              name="role"
-              value={formData.role}
-              onChange={(value) => setFormData({ ...formData, role: value })}
-              options={roleOptions}
-              icon={Shield}
-              required
-            />
-            <FormSelect
-              label="Iglesia Asignada"
-              name="church"
-              value={formData.church}
-              onChange={(value) => setFormData({ ...formData, church: value })}
-              options={churchOptions}
-              icon={Church}
-              required
-            />
+            <FormInput label="Telefono" name="phone" type="tel" placeholder="+52 55 1234 5678" value={formData.phone} onChange={(v) => setFormData({ ...formData, phone: v })} icon={Phone} />
+            <FormSelect label="Iglesia" name="church_id" value={String(formData.church_id)} onChange={(v) => setFormData({ ...formData, church_id: v ? Number(v) : '' })} options={churchOptions} icon={Church} />
           </FormFieldGroup>
+          {updateM.error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">Error al guardar cambios.</div>}
         </div>
       </FormModal>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={() => console.log("Delete user:", selectedUser)}
+        onConfirm={() => selectedUser && deleteM.mutate(selectedUser.id)}
         title="Eliminar Usuario"
-        message={`Esta seguro de que desea eliminar al usuario "${selectedUser?.name}"? Esta accion no se puede deshacer.`}
-        confirmText="Si, Eliminar"
+        message={`Esta seguro de que desea eliminar al usuario "${selectedUser?.full_name}"? Esta accion no se puede deshacer.`}
+        confirmText={deleteM.isPending ? 'Eliminando...' : 'Si, Eliminar'}
         cancelText="Cancelar"
         type="danger"
       />
