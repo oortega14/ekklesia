@@ -256,15 +256,166 @@ class DemoSeeder
   end
 
   def create_service_requests
-    puts "  [stub] create_service_requests"
+    puts "Creating service requests..."
+    central     = Church.find_by(name: "Iglesia Central")
+    norte       = Church.find_by(name: "Iglesia del Norte")
+    esperanza   = Church.find_by(name: "Iglesia Esperanza")
+    nueva_vida  = Church.find_by(name: "Iglesia Nueva Vida")
+
+    pedro_lead  = User.find_by(account: Account.find_by(email: "pedro.lider@demo.dev"))
+    roberto_lead = User.find_by(account: Account.find_by(email: "roberto.lider@demo.dev"))
+
+    carlos = User.find_by(account: Account.find_by(email: "carlos.mendoza@demo.dev"))
+    ana    = User.find_by(account: Account.find_by(email: "ana.rodriguez@demo.dev"))
+    laura  = User.find_by(account: Account.find_by(email: "laura.martinez@demo.dev"))
+    miguel = User.find_by(account: Account.find_by(email: "miguel.torres@demo.dev"))
+
+    requests = [
+      { church: central,    requested_by: carlos, status: :pending,
+        service_type: "Reunión de Jóvenes",  requested_for: 1.week.from_now },
+      { church: central,    requested_by: carlos, reviewed_by: pedro_lead, status: :approved,
+        service_type: "Conferencia Familiar", requested_for: 3.weeks.from_now,
+        reviewed_at_offset: 1.week.ago },
+      { church: norte,      requested_by: ana,    reviewed_by: pedro_lead, status: :rejected,
+        service_type: "Servicio Especial",   requested_for: 2.weeks.from_now,
+        reviewed_at_offset: 3.days.ago },
+      { church: esperanza,  requested_by: laura,  status: :pending,
+        service_type: "Vigilia",              requested_for: 10.days.from_now },
+      { church: nueva_vida, requested_by: miguel, reviewed_by: roberto_lead, status: :approved,
+        service_type: "Bautismos",            requested_for: 4.weeks.from_now,
+        reviewed_at_offset: 2.weeks.ago }
+    ]
+
+    @service_requests = requests.map do |spec|
+      ActsAsTenant.with_tenant(spec[:church].ministry) do
+        ServiceRequest.create!(
+          ministry:     spec[:church].ministry,
+          church:       spec[:church],
+          requested_by: spec[:requested_by],
+          reviewed_by:  spec[:reviewed_by],
+          service_type: spec[:service_type],
+          requested_for: spec[:requested_for],
+          status:       spec[:status]
+        )
+      end
+    end
+
+    by_status = @service_requests.group_by(&:status).transform_values(&:length)
+    puts "  ✓ #{@service_requests.size} service requests (#{by_status})"
   end
 
   def create_demo_notifications
-    puts "  [stub] create_demo_notifications"
+    puts "Creating demo notifications..."
+    count = 0
+
+    User.where(role: :lead_pastor).find_each do |lead|
+      # 3 unread + 2 read = 5 total per lead pastor
+      count += seed_notifications_for(lead, [
+        { kind: "service_request_created",     read: false, days_ago: 1 },
+        { kind: "attendance_report_submitted", read: false, days_ago: 2 },
+        { kind: "contribution_recorded",       read: false, days_ago: 3 },
+        { kind: "attendance_report_submitted", read: true,  days_ago: 7 },
+        { kind: "contribution_recorded",       read: true,  days_ago: 10 }
+      ])
+    end
+
+    User.where(role: :pastor).find_each do |pastor|
+      # 2 unread per pastor (their service request feedback)
+      count += seed_notifications_for(pastor, [
+        { kind: "service_request_approved", read: false, days_ago: 1 },
+        { kind: "service_request_rejected", read: false, days_ago: 2 }
+      ])
+    end
+
+    puts "  ✓ #{count} demo notifications"
+  end
+
+  def seed_notifications_for(user, items)
+    items.each do |item|
+      Notification.create!(
+        recipient:  user,
+        kind:       item[:kind],
+        payload:    payload_for_demo(item[:kind], user),
+        read_at:    item[:read] ? item[:days_ago].days.ago + 1.hour : nil,
+        created_at: item[:days_ago].days.ago,
+        updated_at: item[:days_ago].days.ago
+      )
+    end
+    items.length
+  end
+
+  def payload_for_demo(kind, user)
+    case kind
+    when "service_request_created"
+      { "service_request_id" => 1, "service_type" => "Reunión Especial",
+        "requested_by_name"  => "Carlos Mendoza", "church_name" => "Iglesia Central",
+        "requested_for"      => 1.week.from_now.iso8601,
+        "target_url"         => "/lead-pastor/services?request=1" }
+    when "service_request_approved"
+      { "service_request_id" => 2, "service_type" => "Conferencia Familiar",
+        "reviewed_by_name"   => user.ministry&.users&.find_by(role: :lead_pastor)&.full_name,
+        "church_name"        => "Iglesia Central",
+        "requested_for"      => 3.weeks.from_now.iso8601,
+        "target_url"         => "/pastor/services" }
+    when "service_request_rejected"
+      { "service_request_id" => 3, "service_type" => "Servicio Especial",
+        "reviewed_by_name"   => user.ministry&.users&.find_by(role: :lead_pastor)&.full_name,
+        "church_name"        => "Iglesia del Norte",
+        "requested_for"      => 2.weeks.from_now.iso8601,
+        "target_url"         => "/pastor/services" }
+    when "attendance_report_submitted"
+      { "attendance_report_id" => 1, "service_id" => 1,
+        "reported_by_name" => "Carlos Mendoza", "church_name" => "Iglesia Central",
+        "service_type" => "Culto Dominical",
+        "service_date" => 1.week.ago.iso8601, "total" => 187,
+        "target_url"   => "/lead-pastor/reports" }
+    when "contribution_recorded"
+      { "contribution_id" => 1, "service_id" => 1, "type" => "Tithe", "type_label" => "Diezmos",
+        "amount" => 1500.0, "reported_by_name" => "Carlos Mendoza",
+        "church_name" => "Iglesia Central",
+        "target_url"  => "/lead-pastor/reports" }
+    else
+      { "target_url" => "/" }
+    end
   end
 
   def print_summary
-    puts "✓ Demo data seeded successfully (stub)."
+    puts ""
+    puts "=== Demo accounts (password: #{DEMO_PASSWORD}) ==="
+    puts ""
+    puts "SUPERADMIN"
+    superadmin = User.find_by(role: :superadmin)
+    puts "  #{superadmin&.account&.email || '(missing!)'}"
+    puts ""
+
+    @ministries.each do |ministry|
+      puts "#{ministry.name.upcase} (#{ministry.country})"
+
+      lead = User.find_by(role: :lead_pastor, ministry_id: ministry.id)
+      puts "  #{lead.account.email.ljust(34)} lead_pastor   [locale: #{lead.locale}]"
+
+      ministry.churches.includes(:users).order(:name).each do |church|
+        church.users.includes(:account).order(:role, :first_name).each do |u|
+          label = u.role == "pastor" ? "pastor       " : "assistant    "
+          puts "  #{u.account.email.ljust(34)} #{label} #{church.name} (#{church.city})"
+        end
+      end
+      puts ""
+    end
+
+    puts "=== Stats ==="
+    puts "  #{Church.count} churches, #{Service.count} services " \
+         "(#{Service.where(status: :completed).count} past + " \
+         "#{Service.where(status: :scheduled).count} upcoming), " \
+         "#{AttendanceReport.count} attendance reports, " \
+         "#{Contribution.count} contributions"
+    puts "  #{ServiceRequest.count} service requests " \
+         "(#{ServiceRequest.pending.count} pending, " \
+         "#{ServiceRequest.approved.count} approved, " \
+         "#{ServiceRequest.rejected.count} rejected)"
+    puts "  #{Notification.count} demo notifications"
+    puts ""
+    puts "✓ Demo data seeded successfully"
   end
 
   # Wraps the block with a no-op stub of Notifications::Dispatcher.call so
