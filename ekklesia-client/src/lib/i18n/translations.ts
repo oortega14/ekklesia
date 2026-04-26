@@ -280,6 +280,34 @@ export interface TranslationKeys {
     newPassword: string
     confirmPassword: string
   }
+  settings: {
+    title: string
+    subtitle: string
+    profileTitle: string
+    profileSubtitle: string
+    securityTitle: string
+    securitySubtitle: string
+    preferencesTitle: string
+    preferencesSubtitle: string
+    firstName: string
+    lastName: string
+    phone: string
+    email: string
+    currentPassword: string
+    newPassword: string
+    confirmNewPassword: string
+    language: string
+    saveProfile: string
+    changePasswordBtn: string
+    savePreferences: string
+    profileSaved: string
+    passwordSaved: string
+    preferencesSaved: string
+    saveFailed: string
+    currentPasswordWrong: string
+    passwordTooShort: string
+    passwordsDoNotMatch: string
+  }
   header: {
     search: string
     notifications: string
@@ -616,6 +644,34 @@ const es: TranslationKeys = {
     newPassword: "Nueva Contrasena",
     confirmPassword: "Confirmar Contrasena",
   },
+  settings: {
+    title:                "Configuración",
+    subtitle:             "Administra tu cuenta",
+    profileTitle:         "Perfil",
+    profileSubtitle:      "Actualiza tu información personal",
+    securityTitle:        "Seguridad",
+    securitySubtitle:     "Cambia tu contraseña",
+    preferencesTitle:     "Preferencias",
+    preferencesSubtitle:  "Ajustes de la aplicación",
+    firstName:            "Nombre",
+    lastName:             "Apellido",
+    phone:                "Teléfono",
+    email:                "Correo electrónico",
+    currentPassword:      "Contraseña actual",
+    newPassword:          "Nueva contraseña",
+    confirmNewPassword:   "Confirmar nueva contraseña",
+    language:             "Idioma",
+    saveProfile:          "Guardar perfil",
+    changePasswordBtn:    "Cambiar contraseña",
+    savePreferences:      "Guardar preferencias",
+    profileSaved:         "Perfil actualizado",
+    passwordSaved:        "Contraseña actualizada",
+    preferencesSaved:     "Preferencias actualizadas",
+    saveFailed:           "No se pudo guardar. Intenta de nuevo.",
+    currentPasswordWrong: "La contraseña actual es incorrecta",
+    passwordTooShort:     "La contraseña debe tener al menos 8 caracteres",
+    passwordsDoNotMatch:  "Las contraseñas no coinciden"
+  },
   header: {
     search: "Buscar...",
     notifications: "Notificaciones",
@@ -951,6 +1007,34 @@ const en: TranslationKeys = {
     currentPassword: "Current Password",
     newPassword: "New Password",
     confirmPassword: "Confirm Password",
+  },
+  settings: {
+    title:                "Settings",
+    subtitle:             "Manage your account",
+    profileTitle:         "Profile",
+    profileSubtitle:      "Update your personal information",
+    securityTitle:        "Security",
+    securitySubtitle:     "Change your password",
+    preferencesTitle:     "Preferences",
+    preferencesSubtitle:  "Application settings",
+    firstName:            "First name",
+    lastName:             "Last name",
+    phone:                "Phone",
+    email:                "Email",
+    currentPassword:      "Current password",
+    newPassword:          "New password",
+    confirmNewPassword:   "Confirm new password",
+    language:             "Language",
+    saveProfile:          "Save profile",
+    changePasswordBtn:    "Change password",
+    savePreferences:      "Save preferences",
+    profileSaved:         "Profile updated",
+    passwordSaved:        "Password updated",
+    preferencesSaved:     "Preferences updated",
+    saveFailed:           "Couldn't save. Please try again.",
+    currentPasswordWrong: "Current password is incorrect",
+    passwordTooShort:     "Password must be at least 8 characters",
+    passwordsDoNotMatch:  "Passwords do not match"
   },
   header: {
     search: "Search...",
