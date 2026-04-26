@@ -1,164 +1,165 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { motion, AnimatePresence } from "framer-motion"
-import { useEffect, useState } from "react"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { Header } from "@/components/dashboard/header"
-import { NetflixCard } from "@/components/dashboard/netflix-card"
-import { ConfirmModal } from "@/components/dashboard/confirm-modal"
-import { FormModal } from "@/components/dashboard/form-modal"
-import { FormInput, FormSelect, FormTextarea, FormFieldGroup } from "@/components/dashboard/form-input"
-import { Button } from "@/components/ui/button"
-import apiClient from "@/lib/api/client"
-import { useAuthStore, ROLE_LABELS } from "@/lib/auth/store"
+import { motion, AnimatePresence } from 'framer-motion'
+import { useMemo, useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Sidebar } from '@/components/dashboard/sidebar'
+import { Header } from '@/components/dashboard/header'
+import { NetflixCard } from '@/components/dashboard/netflix-card'
+import { ConfirmModal } from '@/components/dashboard/confirm-modal'
+import { FormModal } from '@/components/dashboard/form-modal'
+import { FormInput, FormSelect, FormFieldGroup } from '@/components/dashboard/form-input'
+import { Button } from '@/components/ui/button'
+import { useAuthStore, ROLE_LABELS } from '@/lib/auth/store'
+import {
+  listChurches,
+  createChurch,
+  updateChurch,
+  deleteChurch,
+  type ChurchRow,
+  type ChurchStatus
+} from '@/lib/api/churches'
+import { listMinistries } from '@/lib/api/ministries'
 import {
   Church,
   Plus,
   Search,
   Grid3X3,
   List,
-  Filter,
   MapPin,
   Users,
   User,
   Mail,
   Phone,
   Building2
-} from "lucide-react"
+} from 'lucide-react'
 
-type ChurchStatus = "active" | "pending" | "inactive"
-
-interface ChurchApi {
-  id: number
+interface FormState {
   name: string
-  city: string | null
-  address: string | null
-  status: ChurchStatus
-}
-
-interface ChurchRow {
-  id: number
-  name: string
-  pastor: string
+  ministry_id: number | ''
   city: string
-  members: number
-  services: number
-  status: ChurchStatus
+  address: string
   email: string
   phone: string
-  address: string
+  status: ChurchStatus
 }
 
-function mapChurch(apiChurch: ChurchApi): ChurchRow {
-  return {
-    id: apiChurch.id,
-    name: apiChurch.name,
-    city: apiChurch.city || "Sin ciudad",
-    address: apiChurch.address || "",
-    status: apiChurch.status,
-    // TODO: poblar con datos reales cuando conectemos usuarios/servicios.
-    pastor: "Sin asignar",
-    members: 0,
-    services: 0,
-    email: "",
-    phone: "",
-  }
+const emptyForm: FormState = {
+  name: '',
+  ministry_id: '',
+  city: '',
+  address: '',
+  email: '',
+  phone: '',
+  status: 'active'
 }
 
-const pastorOptions = [
-  { value: "carlos", label: "Carlos Mendez" },
-  { value: "maria", label: "Maria Garcia" },
-  { value: "juan", label: "Juan Lopez" },
-  { value: "ana", label: "Ana Rodriguez" },
-  { value: "pedro", label: "Pedro Sanchez" },
+const statusOptions: Array<{ value: ChurchStatus; label: string }> = [
+  { value: 'active',   label: 'Activa' },
+  { value: 'pending',  label: 'Pendiente' },
+  { value: 'inactive', label: 'Inactiva' }
 ]
 
-const cityOptions = [
-  { value: "Ciudad de Mexico", label: "Ciudad de Mexico" },
-  { value: "Monterrey", label: "Monterrey" },
-  { value: "Guadalajara", label: "Guadalajara" },
-  { value: "Puebla", label: "Puebla" },
-  { value: "Queretaro", label: "Queretaro" },
-  { value: "Tijuana", label: "Tijuana" },
-]
+function statusLabel(status: ChurchStatus) {
+  return statusOptions.find((o) => o.value === status)?.label ?? status
+}
 
 function SuperAdminIglesias() {
   const { user } = useAuthStore()
-  const [churches, setChurches] = useState<ChurchRow[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
-  const [searchQuery, setSearchQuery] = useState("")
+  const qc = useQueryClient()
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [searchQuery, setSearchQuery] = useState('')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedChurch, setSelectedChurch] = useState<ChurchRow | null>(null)
+  const [formData, setFormData] = useState<FormState>(emptyForm)
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: "",
-    pastor: "",
-    city: "",
-    email: "",
-    phone: "",
-    address: "",
-    notes: ""
+  const churchesQ   = useQuery({ queryKey: ['churches'],   queryFn: () => listChurches({ perPage: 100 }) })
+  const ministriesQ = useQuery({ queryKey: ['ministries'], queryFn: listMinistries })
+
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey: ['churches'] })
+    qc.invalidateQueries({ queryKey: ['stats'] })
+    qc.invalidateQueries({ queryKey: ['users'] })
+  }
+
+  const createM = useMutation({
+    mutationFn: createChurch,
+    onSuccess: () => { invalidateAll(); setIsCreateModalOpen(false); setFormData(emptyForm) }
+  })
+  const updateM = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateChurch>[1] }) => updateChurch(id, payload),
+    onSuccess: () => { invalidateAll(); setIsEditModalOpen(false); setFormData(emptyForm); setSelectedChurch(null) }
+  })
+  const deleteM = useMutation({
+    mutationFn: deleteChurch,
+    onSuccess: () => { invalidateAll(); setIsDeleteModalOpen(false); setSelectedChurch(null) }
   })
 
-  const fetchChurches = async () => {
-    try {
-      setError(null)
-      setIsLoading(true)
-      const response = await apiClient.get('/api/v1/churches')
-      const apiChurches = (response.data?.churches || []) as ChurchApi[]
-      setChurches(apiChurches.map(mapChurch))
-    } catch {
-      setError('No se pudo cargar la lista de iglesias.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const churches = churchesQ.data ?? []
 
-  useEffect(() => {
-    void fetchChurches()
-  }, [])
+  const filteredChurches = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    if (!q) return churches
+    return churches.filter((c) =>
+      c.name.toLowerCase().includes(q) ||
+      (c.lead_pastor_name ?? '').toLowerCase().includes(q) ||
+      (c.city ?? '').toLowerCase().includes(q)
+    )
+  }, [churches, searchQuery])
 
-  const filteredChurches = churches.filter(church =>
-    church.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    church.pastor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    church.city.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const ministryOptions = (ministriesQ.data ?? []).map((m) => ({ value: String(m.id), label: m.name }))
 
-  const handleDelete = (church: ChurchRow) => {
-    setSelectedChurch(church)
-    setIsDeleteModalOpen(true)
-  }
-
-  const handleEdit = (church: ChurchRow) => {
-    setSelectedChurch(church)
+  const openCreate = () => { setFormData(emptyForm); setIsCreateModalOpen(true) }
+  const openEdit = (c: ChurchRow) => {
+    setSelectedChurch(c)
     setFormData({
-      name: church.name,
-      pastor: church.pastor,
-      city: church.city,
-      email: church.email,
-      phone: church.phone,
-      address: church.address,
-      notes: ""
+      name:        c.name,
+      ministry_id: c.ministry_id,
+      city:        c.city ?? '',
+      address:     c.address ?? '',
+      email:       c.email ?? '',
+      phone:       c.phone ?? '',
+      status:      c.status
     })
     setIsEditModalOpen(true)
   }
+  const openDelete = (c: ChurchRow) => { setSelectedChurch(c); setIsDeleteModalOpen(true) }
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      pastor: "",
-      city: "",
-      email: "",
-      phone: "",
-      address: "",
-      notes: ""
+  const submitCreate = () => {
+    if (!formData.name || formData.ministry_id === '') return
+    createM.mutate({
+      name:        formData.name,
+      ministry_id: Number(formData.ministry_id),
+      city:        formData.city || undefined,
+      address:     formData.address || undefined,
+      email:       formData.email || undefined,
+      phone:       formData.phone || undefined,
+      status:      formData.status
     })
   }
+
+  const submitUpdate = () => {
+    if (!selectedChurch) return
+    updateM.mutate({
+      id: selectedChurch.id,
+      payload: {
+        name:    formData.name,
+        city:    formData.city || undefined,
+        address: formData.address || undefined,
+        email:   formData.email || undefined,
+        phone:   formData.phone || undefined,
+        status:  formData.status
+      }
+    })
+  }
+
+  const stats = [
+    { label: 'Total Iglesias', value: churches.length },
+    { label: 'Activas',        value: churches.filter((c) => c.status === 'active').length },
+    { label: 'Pendientes',     value: churches.filter((c) => c.status === 'pending').length },
+    { label: 'Inactivas',      value: churches.filter((c) => c.status === 'inactive').length }
+  ]
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -172,13 +173,11 @@ function SuperAdminIglesias() {
         />
 
         <main className="p-6 bg-white">
-          {/* Toolbar */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col md:flex-row gap-4 mb-8"
           >
-            {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
@@ -190,66 +189,55 @@ function SuperAdminIglesias() {
               />
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-3">
-              {/* View Toggle */}
               <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-300">
                 <button
-                  onClick={() => setViewMode("grid")}
+                  onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === "grid"
-                      ? "bg-blue-100 text-blue-700"
-                      : "text-slate-500 hover:text-slate-800"
+                    viewMode === 'grid'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   <Grid3X3 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setViewMode("list")}
+                  onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === "list"
-                      ? "bg-blue-100 text-blue-700"
-                      : "text-slate-500 hover:text-slate-800"
+                    viewMode === 'list'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   <List className="w-5 h-5" />
                 </button>
               </div>
 
-              <Button variant="blueOutline" className="gap-2">
-                <Filter className="w-4 h-4" />
-                Filtros
-              </Button>
-
-              <Button
-                onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
-                variant="blue" className="gap-2"
-              >
+              <Button onClick={openCreate} variant="blue" className="gap-2">
                 <Plus className="w-4 h-4" />
                 Nueva Iglesia
               </Button>
             </div>
           </motion.div>
 
-          {error && (
+          {churchesQ.error && (
             <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+              No se pudo cargar la lista de iglesias.
+            </div>
+          )}
+          {(createM.error || updateM.error || deleteM.error) && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              No se pudo guardar el cambio. Inténtalo de nuevo.
             </div>
           )}
 
-          {/* Stats Row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
           >
-            {[
-              { label: "Total Iglesias", value: churches.length, color: "blue" },
-              { label: "Activas", value: churches.filter(c => c.status === "active").length, color: "green" },
-              { label: "Pendientes", value: churches.filter(c => c.status === "pending").length, color: "amber" },
-              { label: "Total Miembros", value: churches.reduce((a, c) => a + c.members, 0), color: "purple" },
-            ].map((stat, index) => (
+            {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -263,120 +251,122 @@ function SuperAdminIglesias() {
             ))}
           </motion.div>
 
-          {/* Churches Grid/List */}
-          {isLoading ? (
+          {churchesQ.isLoading ? (
             <div className="py-16 text-center text-slate-500">Cargando iglesias...</div>
           ) : (
-          <AnimatePresence mode="wait">
-            {viewMode === "grid" ? (
-              <motion.div
-                key="grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {filteredChurches.map((church, index) => (
-                  <NetflixCard
-                    key={church.id}
-                    title={church.name}
-                    subtitle={`Pastor: ${church.pastor}`}
-                    badges={[
-                      {
-                        label: church.status === "active" ? "Activa" : "Pendiente",
-                        color: church.status === "active" ? "green" : "amber"
+            <AnimatePresence mode="wait">
+              {viewMode === 'grid' ? (
+                <motion.div
+                  key="grid"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {filteredChurches.map((church, index) => (
+                    <NetflixCard
+                      key={church.id}
+                      title={church.name}
+                      subtitle={`Pastor: ${church.lead_pastor_name ?? 'Sin asignar'}`}
+                      badges={[{
+                        label: statusLabel(church.status),
+                        color: church.status === 'active'
+                          ? 'green'
+                          : church.status === 'pending'
+                            ? 'amber'
+                            : 'red'
+                      }]}
+                      stats={[
+                        { label: '',           value: church.city ?? '—',   icon: <MapPin className="w-3 h-3" /> },
+                        { label: 'asignados',  value: church.users_count,   icon: <Users className="w-3 h-3" /> }
+                      ]}
+                      gradient={
+                        index % 3 === 0
+                          ? 'from-blue-600/40 to-blue-900/60'
+                          : index % 3 === 1
+                            ? 'from-indigo-600/40 to-indigo-900/60'
+                            : 'from-cyan-600/40 to-cyan-900/60'
                       }
-                    ]}
-                    stats={[
-                      { label: "", value: church.city, icon: <MapPin className="w-3 h-3" /> },
-                      { label: "miembros", value: church.members, icon: <Users className="w-3 h-3" /> },
-                    ]}
-                    gradient={
-                      index % 3 === 0
-                        ? "from-blue-600/40 to-blue-900/60"
-                        : index % 3 === 1
-                          ? "from-indigo-600/40 to-indigo-900/60"
-                          : "from-cyan-600/40 to-cyan-900/60"
-                    }
-                    delay={index * 0.05}
-                    onView={() => console.log("View", church)}
-                    onEdit={() => handleEdit(church)}
-                    onDelete={() => handleDelete(church)}
-                  />
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="list"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                {filteredChurches.map((church, index) => (
-                  <motion.div
-                    key={church.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                    className="group flex items-center gap-4 p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-300 shadow-sm transition-all cursor-pointer"
-                  >
-                    <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <Church className="w-7 h-7 text-blue-700" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-base font-semibold text-slate-900">{church.name}</h3>
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${
-                          church.status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}>
-                          {church.status === "active" ? "Activa" : "Pendiente"}
-                        </span>
+                      delay={index * 0.05}
+                      onView={() => console.log('View', church)}
+                      onEdit={() => openEdit(church)}
+                      onDelete={() => openDelete(church)}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="list"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-3"
+                >
+                  {filteredChurches.map((church, index) => (
+                    <motion.div
+                      key={church.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className="group flex items-center gap-4 p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-300 shadow-sm transition-all cursor-pointer"
+                    >
+                      <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <Church className="w-7 h-7 text-blue-700" />
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <User className="w-3 h-3" />
-                          {church.pastor}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {church.city}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {church.members} miembros
-                        </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-base font-semibold text-slate-900">{church.name}</h3>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${
+                            church.status === 'active'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : church.status === 'pending'
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {statusLabel(church.status)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            {church.lead_pastor_name ?? 'Sin asignar'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {church.city ?? '—'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {church.users_count} asignados
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEdit(church)}
-                        className="text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDelete(church)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openEdit(church)}
+                          className="text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openDelete(church)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           )}
 
-          {/* Empty State */}
-          {filteredChurches.length === 0 && (
+          {!churchesQ.isLoading && filteredChurches.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -385,45 +375,32 @@ function SuperAdminIglesias() {
               <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mb-4">
                 <Church className="w-10 h-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No se encontraron iglesias</h3>
-              <p className="text-slate-500 text-sm mb-4">Intenta con otros terminos de busqueda</p>
-              <Button onClick={() => setSearchQuery("")} variant="blueOutline">
-                Limpiar busqueda
-              </Button>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                {churches.length === 0 ? 'No hay iglesias registradas' : 'Sin resultados'}
+              </h3>
+              <p className="text-slate-500 text-sm mb-4">
+                {churches.length === 0
+                  ? 'Crea la primera iglesia con el botón de arriba.'
+                  : 'Prueba con otros términos de búsqueda.'}
+              </p>
+              {churches.length > 0 && (
+                <Button onClick={() => setSearchQuery('')} variant="blueOutline">
+                  Limpiar busqueda
+                </Button>
+              )}
             </motion.div>
           )}
         </main>
       </div>
 
-      {/* Create Modal */}
       <FormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={async () => {
-          try {
-            setIsSaving(true)
-            setError(null)
-            await apiClient.post('/api/v1/churches', {
-              church: {
-                name: formData.name,
-                city: formData.city || null,
-                address: formData.address || null,
-                status: 'pending',
-              },
-            })
-            setIsCreateModalOpen(false)
-            resetForm()
-            await fetchChurches()
-          } catch {
-            setError('No se pudo crear la iglesia.')
-          } finally {
-            setIsSaving(false)
-          }
-        }}
+        onSubmit={submitCreate}
         title="Nueva Iglesia"
         subtitle="Registra una nueva iglesia en el sistema"
         icon={<Church className="w-6 h-6" />}
-        submitText="Crear Iglesia"
+        submitText={createM.isPending ? 'Creando...' : 'Crear Iglesia'}
         size="lg"
       >
         <div className="space-y-4">
@@ -438,26 +415,36 @@ function SuperAdminIglesias() {
               required
             />
             <FormSelect
-              label="Pastor Principal"
-              name="pastor"
-              value={formData.pastor}
-              onChange={(value) => setFormData({ ...formData, pastor: value })}
-              options={pastorOptions}
-              icon={User}
+              label="Ministerio"
+              name="ministry_id"
+              value={String(formData.ministry_id)}
+              onChange={(value) => setFormData({ ...formData, ministry_id: value ? Number(value) : '' })}
+              options={ministryOptions}
+              icon={Building2}
               required
             />
           </FormFieldGroup>
 
           <FormFieldGroup>
-            <FormSelect
+            <FormInput
               label="Ciudad"
               name="city"
+              placeholder="Ej: Ciudad de Mexico"
               value={formData.city}
               onChange={(value) => setFormData({ ...formData, city: value })}
-              options={cityOptions}
               icon={MapPin}
+            />
+            <FormSelect
+              label="Estado"
+              name="status"
+              value={formData.status}
+              onChange={(value) => setFormData({ ...formData, status: value as ChurchStatus })}
+              options={statusOptions}
               required
             />
+          </FormFieldGroup>
+
+          <FormFieldGroup>
             <FormInput
               label="Correo Electronico"
               name="email"
@@ -466,11 +453,7 @@ function SuperAdminIglesias() {
               value={formData.email}
               onChange={(value) => setFormData({ ...formData, email: value })}
               icon={Mail}
-              required
             />
-          </FormFieldGroup>
-
-          <FormFieldGroup>
             <FormInput
               label="Telefono"
               name="phone"
@@ -480,57 +463,27 @@ function SuperAdminIglesias() {
               onChange={(value) => setFormData({ ...formData, phone: value })}
               icon={Phone}
             />
-            <FormInput
-              label="Direccion"
-              name="address"
-              placeholder="Calle, numero, colonia"
-              value={formData.address}
-              onChange={(value) => setFormData({ ...formData, address: value })}
-              icon={Building2}
-            />
           </FormFieldGroup>
 
-          <FormTextarea
-            label="Notas adicionales"
-            name="notes"
-            placeholder="Informacion adicional sobre la iglesia..."
-            value={formData.notes}
-            onChange={(value) => setFormData({ ...formData, notes: value })}
-            rows={3}
+          <FormInput
+            label="Direccion"
+            name="address"
+            placeholder="Calle, numero, colonia"
+            value={formData.address}
+            onChange={(value) => setFormData({ ...formData, address: value })}
+            icon={Building2}
           />
         </div>
       </FormModal>
 
-      {/* Edit Modal */}
       <FormModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSubmit={async () => {
-          if (!selectedChurch) return
-          try {
-            setIsSaving(true)
-            setError(null)
-            await apiClient.put(`/api/v1/churches/${selectedChurch.id}`, {
-              church: {
-                name: formData.name,
-                city: formData.city || null,
-                address: formData.address || null,
-                status: selectedChurch.status,
-              },
-            })
-            setIsEditModalOpen(false)
-            setSelectedChurch(null)
-            await fetchChurches()
-          } catch {
-            setError('No se pudo actualizar la iglesia.')
-          } finally {
-            setIsSaving(false)
-          }
-        }}
+        onSubmit={submitUpdate}
         title="Editar Iglesia"
         subtitle={selectedChurch?.name}
         icon={<Church className="w-6 h-6" />}
-        submitText="Guardar Cambios"
+        submitText={updateM.isPending ? 'Guardando...' : 'Guardar Cambios'}
         size="lg"
       >
         <div className="space-y-4">
@@ -545,25 +498,23 @@ function SuperAdminIglesias() {
               required
             />
             <FormSelect
-              label="Pastor Principal"
-              name="pastor"
-              value={formData.pastor}
-              onChange={(value) => setFormData({ ...formData, pastor: value })}
-              options={pastorOptions}
-              icon={User}
+              label="Estado"
+              name="status"
+              value={formData.status}
+              onChange={(value) => setFormData({ ...formData, status: value as ChurchStatus })}
+              options={statusOptions}
               required
             />
           </FormFieldGroup>
 
           <FormFieldGroup>
-            <FormSelect
+            <FormInput
               label="Ciudad"
               name="city"
+              placeholder="Ej: Ciudad de Mexico"
               value={formData.city}
               onChange={(value) => setFormData({ ...formData, city: value })}
-              options={cityOptions}
               icon={MapPin}
-              required
             />
             <FormInput
               label="Correo Electronico"
@@ -573,7 +524,6 @@ function SuperAdminIglesias() {
               value={formData.email}
               onChange={(value) => setFormData({ ...formData, email: value })}
               icon={Mail}
-              required
             />
           </FormFieldGroup>
 
@@ -599,27 +549,13 @@ function SuperAdminIglesias() {
         </div>
       </FormModal>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={async () => {
-          if (!selectedChurch) return
-          try {
-            setIsSaving(true)
-            setError(null)
-            await apiClient.delete(`/api/v1/churches/${selectedChurch.id}`)
-            setSelectedChurch(null)
-            await fetchChurches()
-          } catch {
-            setError('No se pudo eliminar la iglesia.')
-          } finally {
-            setIsSaving(false)
-          }
-        }}
+        onConfirm={() => selectedChurch && deleteM.mutate(selectedChurch.id)}
         title="Eliminar Iglesia"
         message={`Esta seguro de que desea eliminar "${selectedChurch?.name}"? Esta accion no se puede deshacer y se perderan todos los datos asociados.`}
-        confirmText="Si, Eliminar"
+        confirmText={deleteM.isPending ? 'Eliminando...' : 'Si, Eliminar'}
         cancelText="Cancelar"
         type="danger"
       />

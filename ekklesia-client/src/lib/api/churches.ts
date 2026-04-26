@@ -26,3 +26,34 @@ export async function listChurches(params: ListChurchesParams = {}): Promise<Chu
   })
   return data.churches
 }
+
+export interface CreateChurchPayload {
+  name: string
+  city?: string
+  address?: string
+  email?: string
+  phone?: string
+  status?: ChurchStatus
+  ministry_id?: number
+}
+
+export interface UpdateChurchPayload {
+  name?: string
+  city?: string
+  address?: string
+  email?: string
+  phone?: string
+  status?: ChurchStatus
+}
+
+export async function createChurch(payload: CreateChurchPayload): Promise<void> {
+  await apiClient.post('/api/v1/churches', { church: payload })
+}
+
+export async function updateChurch(id: number, payload: UpdateChurchPayload): Promise<void> {
+  await apiClient.put(`/api/v1/churches/${id}`, { church: payload })
+}
+
+export async function deleteChurch(id: number): Promise<void> {
+  await apiClient.delete(`/api/v1/churches/${id}`)
+}
