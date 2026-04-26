@@ -12,9 +12,12 @@ class User < ApplicationRecord
     assistant:   3
   }
 
+  LOCALES = %w[es en].freeze
+
   validates :first_name, :last_name, :role, presence: true
   validates :ministry_id, presence: true, unless: :superadmin?
   validates :church_id, presence: true, if: -> { pastor? || assistant? }
+  validates :locale, inclusion: { in: LOCALES }
 
   delegate :email, to: :account
 

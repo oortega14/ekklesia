@@ -87,4 +87,49 @@ RSpec.describe 'Api::V1::Users', type: :request do
       expect(payload['ministry_name']).to eq(ministry_a.name)
     end
   end
+
+  describe "PATCH /api/v1/users/:id (locale self-update)" do
+    let(:ministry) { create(:ministry) }
+    let(:user)     { create(:user, :lead_pastor, ministry: ministry) }
+
+    it "user updates their own locale to en" do
+      patch "/api/v1/users/#{user.id}",
+            headers: auth_headers_for(user),
+            params:  { user: { locale: "en" } }
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["user"]["locale"]).to eq("en")
+      expect(user.reload.locale).to eq("en")
+    end
+
+    it "rejects unsupported locale" do
+      patch "/api/v1/users/#{user.id}",
+            headers: auth_headers_for(user),
+            params:  { user: { locale: "fr" } }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(user.reload.locale).to eq("es")
+    end
+
+    it "rejects empty locale" do
+      patch "/api/v1/users/#{user.id}",
+            headers: auth_headers_for(user),
+            params:  { user: { locale: "" } }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "user cannot update another user's locale unless superadmin" do
+      ministry_b = create(:ministry)
+      other      = create(:user, :lead_pastor, ministry: ministry_b)
+      patch "/api/v1/users/#{other.id}",
+            headers: auth_headers_for(user),
+            params:  { user: { locale: "en" } }
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "GET /api/v1/users index payload includes locale" do
+      user # materialize
+      get "/api/v1/users", headers: auth_headers_for(create(:user, :superadmin))
+      first = JSON.parse(response.body)["users"].first
+      expect(first.keys).to include("locale")
+    end
+  end
 end

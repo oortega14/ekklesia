@@ -12,7 +12,8 @@ module Api
             role:        current_user.role,
             ministry_id: current_user.ministry_id,
             church_id:   current_user.church_id,
-            phone:       current_user.phone
+            phone:       current_user.phone,
+            locale:      current_user.locale
           }
         }
       end

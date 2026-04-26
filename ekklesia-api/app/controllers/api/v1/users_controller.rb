@@ -62,7 +62,7 @@ module Api
       private
 
       def user_update_params
-        params.require(:user).permit(:first_name, :last_name, :phone, :church_id)
+        params.require(:user).permit(:first_name, :last_name, :phone, :church_id, :locale)
       end
 
       def user_payload(user)
@@ -76,7 +76,8 @@ module Api
           ministry_id:   user.ministry_id,
           ministry_name: user.ministry&.name,
           church_id:     user.church_id,
-          church_name:   user.church&.name
+          church_name:   user.church&.name,
+          locale:        user.locale
         }
       end
     end
