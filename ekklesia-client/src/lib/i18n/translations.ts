@@ -36,6 +36,16 @@ export interface TranslationKeys {
     selectDate: string
     noResults: string
     seeAll: string
+    errorRetry: string
+    empty: string
+    retry: string
+  }
+  contributionTypes: {
+    Tithe: string
+    Offering: string
+    Donation: string
+    Firstfruit: string
+    Covenant: string
   }
   auth: {
     login: string
@@ -335,6 +345,16 @@ const es: TranslationKeys = {
     selectDate: "Seleccionar fecha",
     noResults: "Sin resultados",
     seeAll: "Ver todos",
+    errorRetry: "Algo salio mal. Intentalo de nuevo.",
+    empty: "Sin datos",
+    retry: "Reintentar",
+  },
+  contributionTypes: {
+    Tithe: "Diezmos",
+    Offering: "Ofrendas",
+    Donation: "Donaciones",
+    Firstfruit: "Primicias",
+    Covenant: "Pactos",
   },
   auth: {
     login: "Iniciar Sesion",
@@ -634,6 +654,16 @@ const en: TranslationKeys = {
     selectDate: "Select date",
     noResults: "No results",
     seeAll: "See all",
+    errorRetry: "Something went wrong. Try again.",
+    empty: "No data",
+    retry: "Retry",
+  },
+  contributionTypes: {
+    Tithe: "Tithes",
+    Offering: "Offerings",
+    Donation: "Donations",
+    Firstfruit: "Firstfruits",
+    Covenant: "Covenants",
   },
   auth: {
     login: "Log In",
