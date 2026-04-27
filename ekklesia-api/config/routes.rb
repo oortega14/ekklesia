@@ -25,6 +25,8 @@ Rails.application.routes.draw do
 
       get "attendance_submission", to: "attendance_submission#show"
 
+      get "services_overview", to: "services_overview#show"
+
       get "stats",                         to: "stats#show"
       get "stats/attendance_timeline",     to: "stats#attendance_timeline"
       get "stats/contributions_breakdown", to: "stats#contributions_breakdown"
