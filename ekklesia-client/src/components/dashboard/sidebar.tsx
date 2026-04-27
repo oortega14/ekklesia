@@ -55,6 +55,7 @@ const roleNavItems: Record<string, NavItem[]> = {
   ],
   pastor: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/pastor" },
+    { icon: ClipboardList, labelKey: "nav.attendance", href: "/pastor/attendance" },
     { icon: ClipboardList, labelKey: "nav.reports", href: "/pastor/reports" },
     { icon: Users, labelKey: "nav.assistants", href: "/pastor/assistants" },
     { icon: Calendar, labelKey: "nav.services", href: "/pastor/services" },
@@ -63,6 +64,7 @@ const roleNavItems: Record<string, NavItem[]> = {
   ],
   assistant: [
     { icon: LayoutDashboard, labelKey: "nav.dashboard", href: "/assistant" },
+    { icon: ClipboardList, labelKey: "nav.attendance", href: "/assistant/attendance" },
     { icon: ClipboardList, labelKey: "nav.reports", href: "/assistant/reports" },
     { icon: Bell, labelKey: "nav.notifications", href: "/assistant/notifications" },
     { icon: Settings, labelKey: "nav.settings", href: "/assistant/settings" },
