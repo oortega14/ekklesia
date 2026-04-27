@@ -228,23 +228,6 @@ export interface TranslationKeys {
     empty: string
     error: string
   }
-  services: {
-    title: string
-    addService: string
-    editService: string
-    deleteService: string
-    serviceName: string
-    serviceDate: string
-    serviceTime: string
-    serviceType: string
-    sunday: string
-    wednesday: string
-    friday: string
-    special: string
-    youth: string
-    prayer: string
-    deleteConfirm: string
-  }
   notifications: {
     title: string
     tabUnread: string
@@ -292,6 +275,56 @@ export interface TranslationKeys {
     notesPlaceholder: string
     savedToast: string
     saveFailedToast: string
+  }
+  services: {
+    title: string
+    subtitlePastor: string
+    subtitleLeadPastor: string
+    pendingRequestsHeader: string
+    myRequestsHeader: string
+    upcomingServicesHeader: string
+    recentResolvedHeader: string
+    newRequestButton: string
+    scheduleServiceButton: string
+    approveButton: string
+    rejectButton: string
+    statusPending: string
+    statusApproved: string
+    statusRejected: string
+    statusPendingHelp: string
+    statusApprovedBy: string
+    statusRejectedBy: string
+    approveConfirmTitle: string
+    approveConfirmBody: string
+    rejectConfirmTitle: string
+    rejectConfirmBody: string
+    emptyPending: string
+    emptyMyRequests: string
+    emptyUpcoming: string
+    emptyRecent: string
+    typeRegularSunday: string
+    typeBibleStudy: string
+    typeSpecialMeeting: string
+    typeConference: string
+    typeVigil: string
+    typeBaptisms: string
+    typeOther: string
+    formServiceType: string
+    formChurch: string
+    formRequestedFor: string
+    formScheduledAt: string
+    formNotes: string
+    formNotesPlaceholder: string
+    formRequiredFutureDate: string
+    toastRequestCreated: string
+    toastApproved: string
+    toastRejected: string
+    toastServiceScheduled: string
+    toastError: string
+    reportedBadge: string
+    notReportedBadge: string
+    requestedForLabel: string
+    requestedByLabel: string
   }
   profile: {
     title: string
@@ -590,23 +623,6 @@ const es: TranslationKeys = {
     empty:                    "No hay registros para el período seleccionado.",
     error:                    "No se pudo cargar el reporte. Inténtalo de nuevo."
   },
-  services: {
-    title: "Gestion de Servicios",
-    addService: "Agregar Servicio",
-    editService: "Editar Servicio",
-    deleteService: "Eliminar Servicio",
-    serviceName: "Nombre del Servicio",
-    serviceDate: "Fecha del Servicio",
-    serviceTime: "Hora del Servicio",
-    serviceType: "Tipo de Servicio",
-    sunday: "Domingo",
-    wednesday: "Miercoles",
-    friday: "Viernes",
-    special: "Especial",
-    youth: "Jovenes",
-    prayer: "Oracion",
-    deleteConfirm: "Esta seguro de eliminar este servicio?",
-  },
   notifications: {
     title:           "Notificaciones",
     tabUnread:       "No leídas",
@@ -678,6 +694,56 @@ const es: TranslationKeys = {
     notesPlaceholder:      "Algo destacable del servicio...",
     savedToast:            "Reporte guardado",
     saveFailedToast:       "No se pudo guardar el reporte. Inténtalo de nuevo."
+  },
+  services: {
+    title:                "Servicios y solicitudes",
+    subtitlePastor:       "Resumen de tu iglesia",
+    subtitleLeadPastor:   "Resumen del ministerio",
+    pendingRequestsHeader: "Solicitudes pendientes ({{n}})",
+    myRequestsHeader:     "Mis solicitudes",
+    upcomingServicesHeader: "Próximos servicios",
+    recentResolvedHeader: "Solicitudes resueltas recientes",
+    newRequestButton:     "Solicitar servicio especial",
+    scheduleServiceButton: "Programar servicio",
+    approveButton:        "Aprobar",
+    rejectButton:         "Rechazar",
+    statusPending:        "Pendiente",
+    statusApproved:       "Aprobada",
+    statusRejected:       "Rechazada",
+    statusPendingHelp:    "Esperando revisión",
+    statusApprovedBy:     "Aprobada por {{reviewer}}, {{relative}}",
+    statusRejectedBy:     "Rechazada por {{reviewer}}, {{relative}}",
+    approveConfirmTitle:  "¿Aprobar este servicio?",
+    approveConfirmBody:   "Se agendará automáticamente para el {{date}}.",
+    rejectConfirmTitle:   "¿Rechazar este pedido?",
+    rejectConfirmBody:    "El pastor podrá ver el rechazo en su lista.",
+    emptyPending:         "No hay solicitudes pendientes de revisión.",
+    emptyMyRequests:      "Aún no has hecho solicitudes.",
+    emptyUpcoming:        "No hay servicios próximos agendados.",
+    emptyRecent:          "No hay solicitudes resueltas recientes.",
+    typeRegularSunday:    "Culto Dominical",
+    typeBibleStudy:       "Estudio Bíblico",
+    typeSpecialMeeting:   "Reunión Especial",
+    typeConference:       "Conferencia",
+    typeVigil:            "Vigilia",
+    typeBaptisms:         "Bautismos",
+    typeOther:            "Otros",
+    formServiceType:      "Tipo de servicio",
+    formChurch:           "Iglesia",
+    formRequestedFor:     "Fecha y hora propuesta",
+    formScheduledAt:      "Fecha y hora",
+    formNotes:            "Notas (opcional)",
+    formNotesPlaceholder: "Detalles adicionales...",
+    formRequiredFutureDate: "La fecha debe ser futura",
+    toastRequestCreated:  "Solicitud enviada",
+    toastApproved:        "Solicitud aprobada y servicio agendado",
+    toastRejected:        "Solicitud rechazada",
+    toastServiceScheduled: "Servicio agendado",
+    toastError:           "No se pudo completar la operación",
+    reportedBadge:        "Reportado",
+    notReportedBadge:     "Sin reporte",
+    requestedForLabel:    "Para el {{date}}",
+    requestedByLabel:     "{{name}} · {{church}}"
   },
   profile: {
     title: "Perfil",
@@ -976,23 +1042,6 @@ const en: TranslationKeys = {
     empty:                    "No records for the selected period.",
     error:                    "Could not load the report. Please try again."
   },
-  services: {
-    title: "Service Management",
-    addService: "Add Service",
-    editService: "Edit Service",
-    deleteService: "Delete Service",
-    serviceName: "Service Name",
-    serviceDate: "Service Date",
-    serviceTime: "Service Time",
-    serviceType: "Service Type",
-    sunday: "Sunday",
-    wednesday: "Wednesday",
-    friday: "Friday",
-    special: "Special",
-    youth: "Youth",
-    prayer: "Prayer",
-    deleteConfirm: "Are you sure you want to delete this service?",
-  },
   notifications: {
     title:           "Notifications",
     tabUnread:       "Unread",
@@ -1064,6 +1113,56 @@ const en: TranslationKeys = {
     notesPlaceholder:      "Anything notable about the service...",
     savedToast:            "Report saved",
     saveFailedToast:       "Couldn't save the report. Try again."
+  },
+  services: {
+    title:                "Services and requests",
+    subtitlePastor:       "Your church overview",
+    subtitleLeadPastor:   "Your ministry overview",
+    pendingRequestsHeader: "Pending requests ({{n}})",
+    myRequestsHeader:     "My requests",
+    upcomingServicesHeader: "Upcoming services",
+    recentResolvedHeader: "Recently resolved requests",
+    newRequestButton:     "Request special service",
+    scheduleServiceButton: "Schedule service",
+    approveButton:        "Approve",
+    rejectButton:         "Reject",
+    statusPending:        "Pending",
+    statusApproved:       "Approved",
+    statusRejected:       "Rejected",
+    statusPendingHelp:    "Awaiting review",
+    statusApprovedBy:     "Approved by {{reviewer}}, {{relative}}",
+    statusRejectedBy:     "Rejected by {{reviewer}}, {{relative}}",
+    approveConfirmTitle:  "Approve this service?",
+    approveConfirmBody:   "It will be scheduled automatically for {{date}}.",
+    rejectConfirmTitle:   "Reject this request?",
+    rejectConfirmBody:    "The pastor will see the rejection in their list.",
+    emptyPending:         "No pending requests to review.",
+    emptyMyRequests:      "You haven't made any requests yet.",
+    emptyUpcoming:        "No upcoming services scheduled.",
+    emptyRecent:          "No recently resolved requests.",
+    typeRegularSunday:    "Sunday Service",
+    typeBibleStudy:       "Bible Study",
+    typeSpecialMeeting:   "Special Meeting",
+    typeConference:       "Conference",
+    typeVigil:            "Vigil",
+    typeBaptisms:         "Baptisms",
+    typeOther:            "Other",
+    formServiceType:      "Service type",
+    formChurch:           "Church",
+    formRequestedFor:     "Proposed date and time",
+    formScheduledAt:      "Date and time",
+    formNotes:            "Notes (optional)",
+    formNotesPlaceholder: "Additional details...",
+    formRequiredFutureDate: "Date must be in the future",
+    toastRequestCreated:  "Request sent",
+    toastApproved:        "Request approved and service scheduled",
+    toastRejected:        "Request rejected",
+    toastServiceScheduled: "Service scheduled",
+    toastError:           "Could not complete the operation",
+    reportedBadge:        "Reported",
+    notReportedBadge:     "Not reported",
+    requestedForLabel:    "For {{date}}",
+    requestedByLabel:     "{{name}} · {{church}}"
   },
   profile: {
     title: "Profile",
