@@ -271,6 +271,28 @@ export interface TranslationKeys {
       church_created:              { title: string; body: string }
     }
   }
+  attendance: {
+    title: string
+    pendingHeader: string
+    pendingCountSingular: string
+    pendingCountPlural: string
+    recentHeader: string
+    correctionHint: string
+    emptyTitle: string
+    emptyBody: string
+    reportButton: string
+    cancelButton: string
+    saveButton: string
+    saving: string
+    adults: string
+    youth: string
+    children: string
+    total: string
+    notesLabel: string
+    notesPlaceholder: string
+    savedToast: string
+    saveFailedToast: string
+  }
   profile: {
     title: string
     myProfile: string
@@ -635,6 +657,28 @@ const es: TranslationKeys = {
       }
     }
   },
+  attendance: {
+    title:                 "Reportar asistencia",
+    pendingHeader:         "Servicios pendientes",
+    pendingCountSingular:  "1 servicio pendiente",
+    pendingCountPlural:    "{{n}} servicios pendientes",
+    recentHeader:          "Mis reportes recientes",
+    correctionHint:        "Para corregir un reporte, contacta al pastor principal.",
+    emptyTitle:            "Estás al día",
+    emptyBody:             "No hay servicios pendientes de reportar.",
+    reportButton:          "Reportar",
+    cancelButton:          "Cancelar",
+    saveButton:            "Guardar reporte",
+    saving:                "Guardando...",
+    adults:                "Adultos",
+    youth:                 "Jóvenes",
+    children:              "Niños",
+    total:                 "Total",
+    notesLabel:            "Notas (opcional)",
+    notesPlaceholder:      "Algo destacable del servicio...",
+    savedToast:            "Reporte guardado",
+    saveFailedToast:       "No se pudo guardar el reporte. Inténtalo de nuevo."
+  },
   profile: {
     title: "Perfil",
     myProfile: "Mi Perfil",
@@ -998,6 +1042,28 @@ const en: TranslationKeys = {
         body:  "City: {{city}}"
       }
     }
+  },
+  attendance: {
+    title:                 "Submit attendance",
+    pendingHeader:         "Pending services",
+    pendingCountSingular:  "1 pending service",
+    pendingCountPlural:    "{{n}} pending services",
+    recentHeader:          "My recent reports",
+    correctionHint:        "To correct a report, contact the lead pastor.",
+    emptyTitle:            "You're all caught up",
+    emptyBody:             "No services pending to be reported.",
+    reportButton:          "Report",
+    cancelButton:          "Cancel",
+    saveButton:            "Save report",
+    saving:                "Saving...",
+    adults:                "Adults",
+    youth:                 "Youth",
+    children:              "Children",
+    total:                 "Total",
+    notesLabel:            "Notes (optional)",
+    notesPlaceholder:      "Anything notable about the service...",
+    savedToast:            "Report saved",
+    saveFailedToast:       "Couldn't save the report. Try again."
   },
   profile: {
     title: "Profile",
