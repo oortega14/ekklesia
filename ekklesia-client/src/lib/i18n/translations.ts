@@ -116,6 +116,50 @@ export interface TranslationKeys {
     pendingReports: string
     completedReports: string
   }
+  dashboards: {
+    leadPastor: {
+      title: string
+      subtitle: string
+      churches: string
+      pastors: string
+      servicesThisMonth: string
+      totalAttendance: string
+      totalContributions: string
+      attendanceTitle: string
+      attendanceSubtitle: string
+      contributionsTitle: string
+      contributionsSubtitle: string
+      churchesTableTitle: string
+      colChurchName: string
+      colPastor: string
+      colMembers: string
+      emptyChurches: string
+    }
+    pastor: {
+      title: string
+      subtitle: string
+      services: string
+      pendingAttendance: string
+      pendingContributions: string
+      assistants: string
+      attendanceTitle: string
+      attendanceSubtitle: string
+      contributionsTitle: string
+      contributionsSubtitle: string
+      upcomingHeader: string
+      emptyUpcoming: string
+    }
+    assistant: {
+      title: string
+      subtitle: string
+      pendingRequests: string
+      submittedReports: string
+      pendingServicesHeader: string
+      myRequestsHeader: string
+      emptyPendingServices: string
+      emptyMyRequests: string
+    }
+  }
   superadminDashboard: {
     title: string
     userName: string
@@ -510,6 +554,50 @@ const es: TranslationKeys = {
     monthlyIncome: "Ingresos Mensuales",
     pendingReports: "Reportes Pendientes",
     completedReports: "Reportes Completados",
+  },
+  dashboards: {
+    leadPastor: {
+      title:                    "Resumen del ministerio",
+      subtitle:                 "Vista general de tus iglesias",
+      churches:                 "Iglesias",
+      pastors:                  "Pastores",
+      servicesThisMonth:        "Servicios del mes",
+      totalAttendance:          "Asistencia total",
+      totalContributions:       "Contribuciones totales",
+      attendanceTitle:          "Asistencia (últimos meses)",
+      attendanceSubtitle:       "Suma por mes",
+      contributionsTitle:       "Contribuciones del mes",
+      contributionsSubtitle:    "Distribución por tipo",
+      churchesTableTitle:       "Iglesias del ministerio",
+      colChurchName:            "Iglesia",
+      colPastor:                "Pastor",
+      colMembers:               "Miembros",
+      emptyChurches:            "Aún no hay iglesias registradas."
+    },
+    pastor: {
+      title:                    "Resumen de tu iglesia",
+      subtitle:                 "Vista general",
+      services:                 "Servicios",
+      pendingAttendance:        "Asistencia pendiente",
+      pendingContributions:     "Contribuciones pendientes",
+      assistants:               "Asistentes",
+      attendanceTitle:          "Asistencia (últimos meses)",
+      attendanceSubtitle:       "Suma por mes",
+      contributionsTitle:       "Contribuciones del mes",
+      contributionsSubtitle:    "Distribución por tipo",
+      upcomingHeader:           "Próximos servicios",
+      emptyUpcoming:            "No hay servicios próximos."
+    },
+    assistant: {
+      title:                    "Resumen de tu actividad",
+      subtitle:                 "Tus pendientes y solicitudes",
+      pendingRequests:          "Solicitudes pendientes",
+      submittedReports:         "Reportes enviados",
+      pendingServicesHeader:    "Servicios pendientes de reporte",
+      myRequestsHeader:         "Mis solicitudes recientes",
+      emptyPendingServices:     "No hay servicios pendientes de reporte.",
+      emptyMyRequests:          "No has enviado solicitudes recientemente."
+    }
   },
   superadminDashboard: {
     title: "Dashboard Super Admin",
@@ -929,6 +1017,50 @@ const en: TranslationKeys = {
     monthlyIncome: "Monthly Income",
     pendingReports: "Pending Reports",
     completedReports: "Completed Reports",
+  },
+  dashboards: {
+    leadPastor: {
+      title:                    "Ministry overview",
+      subtitle:                 "Snapshot of your churches",
+      churches:                 "Churches",
+      pastors:                  "Pastors",
+      servicesThisMonth:        "Services this month",
+      totalAttendance:          "Total attendance",
+      totalContributions:       "Total contributions",
+      attendanceTitle:          "Attendance (recent months)",
+      attendanceSubtitle:       "Monthly totals",
+      contributionsTitle:       "Contributions this month",
+      contributionsSubtitle:    "By type",
+      churchesTableTitle:       "Churches in this ministry",
+      colChurchName:            "Church",
+      colPastor:                "Pastor",
+      colMembers:               "Members",
+      emptyChurches:            "No churches yet."
+    },
+    pastor: {
+      title:                    "Your church overview",
+      subtitle:                 "Snapshot",
+      services:                 "Services",
+      pendingAttendance:        "Pending attendance",
+      pendingContributions:     "Pending contributions",
+      assistants:               "Assistants",
+      attendanceTitle:          "Attendance (recent months)",
+      attendanceSubtitle:       "Monthly totals",
+      contributionsTitle:       "Contributions this month",
+      contributionsSubtitle:    "By type",
+      upcomingHeader:           "Upcoming services",
+      emptyUpcoming:            "No upcoming services."
+    },
+    assistant: {
+      title:                    "Your activity overview",
+      subtitle:                 "Pending items and requests",
+      pendingRequests:          "Pending requests",
+      submittedReports:         "Submitted reports",
+      pendingServicesHeader:    "Services awaiting report",
+      myRequestsHeader:         "My recent requests",
+      emptyPendingServices:     "No services awaiting report.",
+      emptyMyRequests:          "You haven't submitted requests recently."
+    }
   },
   superadminDashboard: {
     title: "Super Admin Dashboard",
