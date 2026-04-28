@@ -8,6 +8,26 @@ export interface SuperadminStats {
   total_attendance: number
 }
 
+export interface LeadPastorStats {
+  churches_count: number
+  pastors_count: number
+  services_this_month: number
+  total_attendance: number
+  total_contributions: number
+}
+
+export interface PastorStats {
+  services_count: number
+  pending_attendance_reports: number
+  pending_contributions: number
+  assistants_count: number
+}
+
+export interface AssistantStats {
+  pending_service_requests: number
+  submitted_reports_count: number
+}
+
 export interface AttendanceTimelinePoint {
   month: string
   label: string
@@ -38,4 +58,19 @@ export async function getContributionsBreakdown(): Promise<ContributionBreakdown
     '/api/v1/stats/contributions_breakdown'
   )
   return data.breakdown
+}
+
+export async function getLeadPastorStats(): Promise<LeadPastorStats> {
+  const { data } = await apiClient.get<LeadPastorStats>('/api/v1/stats')
+  return data
+}
+
+export async function getPastorStats(): Promise<PastorStats> {
+  const { data } = await apiClient.get<PastorStats>('/api/v1/stats')
+  return data
+}
+
+export async function getAssistantStats(): Promise<AssistantStats> {
+  const { data } = await apiClient.get<AssistantStats>('/api/v1/stats')
+  return data
 }
